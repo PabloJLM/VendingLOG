@@ -1,0 +1,3 @@
+# Opcional: mejor escalado de imágenes y soporte .jpg (sin esto,
+# la app funciona igual usando solo .png/.gif con escalado más simple).
+pillow

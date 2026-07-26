@@ -1,60 +1,80 @@
 // =====================================================================
-// solucion.v — SOLUCIÓN de referencia (uso del docente, no distribuir)
+// solucion.v — SOLUCIÓN de referencia (docente, no distribuir)
 //
-// Interfaz mínima: la máquina (GUI) le dice al hardware el precio y si
-// hay stock del producto elegido. El estudiante solo diseña la lógica
-// del dinero:
-//   1) SATURACIÓN: sumar la ficha en 4 bits (un bit extra) y recortar
-//      en 7. El crédito nunca "da la vuelta" a 0.
-//   2) COMPARAR ANTES DE RESTAR: vuelto = credito - precio se calcula
-//      SOLO tras validar credito >= precio. En unsigned, 2-5 no da
-//      "negativo": da un número grande (wraparound), y hay que evitarlo.
-//   3) motor_on como pulso limpio de 1 ciclo; si no se puede comprar,
-//      el crédito SE CONSERVA.
+// error = 1 cuando:
+//   - una ficha haría OVERFLOW (la suma pasa de 7; se satura y avisa)
+//   - una compra intenta una RESTA NEGATIVA (credito < precio) o no
+//     hay stock. La resta solo se hace tras validar: nunca wraparound.
 // =====================================================================
 
 module vending_machine (
     input        clk,
     input        rst,
-    input        ficha_1,      // pulso: entró ficha de valor 1
-    input        ficha_5,      // pulso: entró ficha de valor 5
-    input  [2:0] precio,       // precio del producto elegido (lo da la máquina)
+    input        ficha_1,
+    input        ficha_5,
+    input  [3:0] producto,     // 0-8: producto elegido
     input        hay_stock,    // 1 = el producto elegido tiene stock
-    input        btn_comprar,  // pulso: confirmar compra
-    output reg       motor_on, // pulso: dispensar
-    output reg [2:0] credito,  // crédito acumulado (máximo 7)
-    output reg       listo,    // 1 = el crédito alcanza el precio
-    output reg [2:0] vuelto    // vuelto de la última compra
+    input        btn_comprar,
+    output reg       motor_on,
+    output reg [2:0] credito,
+    output reg       listo,
+    output reg [2:0] vuelto,
+    output reg       error     // flag: overflow o resta inválida
 );
 
-    reg [3:0] suma;            // suma con un bit extra (máx 7+5 = 12)
+    // Precio de cada producto (case de la vending)
+    reg [2:0] precio;
+    always @* begin
+        case (producto)
+            4'd0: precio = 3'd2;   // Chips
+            4'd1: precio = 3'd3;   // Galletas
+            4'd2: precio = 3'd5;   // Soda
+            4'd3: precio = 3'd1;   // Chicle
+            4'd4: precio = 3'd4;   // Agua
+            4'd5: precio = 3'd7;   // Chocolate
+            4'd6: precio = 3'd6;   // Café
+            4'd7: precio = 3'd2;   // Caramelo
+            4'd8: precio = 3'd3;   // Jugo
+            default: precio = 3'd7;
+        endcase
+    end
+
+    reg [3:0] suma;              // un bit extra para ver el overflow
 
     always @(posedge clk) begin
         if (rst) begin
             credito  <= 3'd0;
             motor_on <= 1'b0;
             vuelto   <= 3'd0;
+            error    <= 1'b0;
         end else begin
-            motor_on <= 1'b0;                 // pulso de 1 solo ciclo
+            motor_on <= 1'b0;
 
-            // Fichas: acumular con SATURACIÓN en 7
             if (ficha_1 || ficha_5) begin
                 suma = {1'b0, credito} + (ficha_1 ? 4'd1 : 4'd0)
                                        + (ficha_5 ? 4'd5 : 4'd0);
-                credito <= (suma > 4'd7) ? 3'd7 : suma[2:0];
+                if (suma > 4'd7) begin
+                    credito <= 3'd7;      // saturar, nunca dar la vuelta
+                    error   <= 1'b1;      // flag: overflow en la suma
+                end else begin
+                    credito <= suma[2:0];
+                    error   <= 1'b0;
+                end
             end
 
-            // Compra: COMPARAR ANTES DE RESTAR
-            if (btn_comprar && hay_stock && credito >= precio) begin
-                vuelto   <= credito - precio; // resta ya validada: segura
-                credito  <= 3'd0;
-                motor_on <= 1'b1;
+            if (btn_comprar) begin
+                if (hay_stock && credito >= precio) begin
+                    vuelto   <= credito - precio;  // resta ya validada
+                    credito  <= 3'd0;
+                    motor_on <= 1'b1;
+                    error    <= 1'b0;
+                end else begin
+                    error <= 1'b1;        // flag: resta negativa o sin stock
+                end                       // el crédito se conserva
             end
-            // Sin stock o sin crédito: no pasa nada, el crédito se conserva.
         end
     end
 
-    // Salida combinacional: ¿alcanza el crédito?
     always @* listo = (credito >= precio);
 
 endmodule

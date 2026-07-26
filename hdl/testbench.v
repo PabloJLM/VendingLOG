@@ -1,42 +1,37 @@
 // =====================================================================
-// testbench.v — Testbench fijo del simulador (el estudiante NO lo ve)
+// testbench.v — Testbench fijo (el estudiante NO lo ve)
 //
-// Batch replay: lee TODA la historia desde "events.hex", instancia el
-// módulo del estudiante y vuelca el estado a "output.csv" por ciclo.
-//
-// events.hex: un byte hex por línea (nibble alto = opcode, bajo = arg)
-//   0x1_  ficha_1 (pulso)
-//   0x2_  ficha_5 (pulso)
-//   0x3h  selección: h = {hay_stock, precio[2:0]}  (queda fijo)
-//   0x4_  btn_comprar (pulso)
-//   0xFF  fin
+// events.hex: un byte por línea (nibble alto = opcode, bajo = arg)
+//   0x1_ ficha_1 (pulso) | 0x2_ ficha_5 (pulso)
+//   0x3n producto = n    | 0x5s hay_stock = s
+//   0x4_ btn_comprar (pulso) | 0xFF fin
 //
 // Docente: "vvp sim.vvp +vcd" genera wave.vcd para GTKWave.
 // =====================================================================
 `timescale 1ns/1ps
 
 module testbench;
-    localparam SETTLE = 2;            // ciclos entre eventos
+    localparam SETTLE = 2;
 
     reg        clk = 0, rst = 1;
     reg        ficha_1 = 0, ficha_5 = 0, btn_comprar = 0;
-    reg  [2:0] precio = 3'd7;         // sin selección: precio alto
+    reg  [3:0] producto = 4'd15;
     reg        hay_stock = 0;
-    wire       motor_on, listo;
+    wire       motor_on, listo, error;
     wire [2:0] credito, vuelto;
 
     vending_machine dut (
         .clk(clk), .rst(rst),
         .ficha_1(ficha_1), .ficha_5(ficha_5),
-        .precio(precio), .hay_stock(hay_stock),
+        .producto(producto), .hay_stock(hay_stock),
         .btn_comprar(btn_comprar),
         .motor_on(motor_on), .credito(credito),
-        .listo(listo), .vuelto(vuelto)
+        .listo(listo), .vuelto(vuelto), .error(error)
     );
 
     always #5 clk = ~clk;
 
-    initial begin                     // watchdog
+    initial begin
         #2000000;
         $display("TB_WATCHDOG_TIMEOUT");
         $finish;
@@ -51,13 +46,13 @@ module testbench;
     reg [7:0] ev;
     integer   fd, i, j, cycle, ev_idx;
 
-    task step;                        // un ciclo + una fila del CSV
+    task step;
         begin
             @(posedge clk);
             #1;
             cycle = cycle + 1;
-            $fwrite(fd, "%0d,%0d,%b,%0d,%b,%0d\n",
-                    cycle, ev_idx, motor_on, credito, listo, vuelto);
+            $fwrite(fd, "%0d,%0d,%b,%0d,%b,%0d,%b\n",
+                    cycle, ev_idx, motor_on, credito, listo, vuelto, error);
         end
     endtask
 
@@ -66,7 +61,7 @@ module testbench;
         $readmemh("events.hex", events);
 
         fd = $fopen("output.csv", "w");
-        $fwrite(fd, "cycle,event,motor_on,credito,listo,vuelto\n");
+        $fwrite(fd, "cycle,event,motor_on,credito,listo,vuelto,error\n");
         cycle = 0;
         ev_idx = -1;
 
@@ -79,7 +74,8 @@ module testbench;
             case (ev[7:4])
                 4'h1: begin ficha_1 = 1;     step; ficha_1 = 0;     end
                 4'h2: begin ficha_5 = 1;     step; ficha_5 = 0;     end
-                4'h3: begin precio = ev[2:0]; hay_stock = ev[3];    end
+                4'h3: producto = ev[3:0];
+                4'h5: hay_stock = ev[0];
                 4'h4: begin btn_comprar = 1; step; btn_comprar = 0; end
                 default: ;
             endcase
