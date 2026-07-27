@@ -47,6 +47,7 @@ class App:
         self.root.configure(bg=self.T["fondo_app"])
         self.izq.configure(bg=self.T["fondo_app"])
         self.editor.aplicar_tema(self.T, self.hl)
+        self.editor.set_fondo_tema(self.T)
         self.maq.draw()
 
     def _correr(self):

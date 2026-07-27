@@ -13,6 +13,9 @@ FUENTE_UI     = ("Segoe UI", 10, "bold")
 FUENTE_CHICA  = ("Segoe UI", 8)
 FUENTE_EDITOR = ("Courier New", 11)
 
+FUENTES  = ["Courier New", "Consolas", "Lucida Console"]
+TAMANOS  = [9, 10, 11, 12, 13, 14, 16, 18]
+
 FALLBACK = {"In the Pool": {
     "fondo_editor": "#101A24", "texto_editor": "#D7E3F4",
     "fondo_consola": "#0C141C", "texto_consola": "#C8D6EB",

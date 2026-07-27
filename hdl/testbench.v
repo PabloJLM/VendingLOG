@@ -1,13 +1,3 @@
-// =====================================================================
-// testbench.v — Testbench fijo (el estudiante NO lo ve)
-//
-// events.hex: un byte por línea (nibble alto = opcode, bajo = arg)
-//   0x1_ ficha_1 (pulso) | 0x2_ ficha_5 (pulso)
-//   0x3n producto = n    | 0x5s hay_stock = s
-//   0x4_ btn_comprar (pulso) | 0xFF fin
-//
-// Docente: "vvp sim.vvp +vcd" genera wave.vcd para GTKWave.
-// =====================================================================
 `timescale 1ns/1ps
 
 module testbench;

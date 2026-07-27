@@ -1,24 +1,3 @@
-// =====================================================================
-// MÁQUINA EXPENDEDORA — Tu módulo Verilog
-//
-// Completá los TODO. NO cambies el nombre del módulo ni sus puertos.
-//
-//  1. CASE DE LA VENDING: cada producto tiene su precio.
-//     Ej.: producto 2 (Soda) vale 5 → al comprar se restan 5.
-//
-//  2. FICHAS con saturación: el crédito máximo es 7. Si la suma se
-//     pasa, el crédito queda en 7 y encendés el flag "error"
-//     (overflow). Pista: sumá en 4 bits (un bit extra).
-//
-//  3. COMPRA: solo si hay_stock y credito >= precio →
-//     motor_on = 1 por UN ciclo, vuelto = credito - precio, credito = 0.
-//     Si credito < precio, la resta daría "negativo" (en binario sin
-//     signo da un número gigante): NO restes, encendé el flag "error"
-//     y conservá el crédito.
-//
-//  4. listo = 1 cuando el crédito alcanza el precio (combinacional).
-// =====================================================================
-
 module vending_machine (
     input        clk,
     input        rst,

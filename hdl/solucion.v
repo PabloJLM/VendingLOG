@@ -1,12 +1,4 @@
-// =====================================================================
-// solucion.v — SOLUCIÓN de referencia (docente, no distribuir)
-//
-// error = 1 cuando:
-//   - una ficha haría OVERFLOW (la suma pasa de 7; se satura y avisa)
-//   - una compra intenta una RESTA NEGATIVA (credito < precio) o no
-//     hay stock. La resta solo se hace tras validar: nunca wraparound.
-// =====================================================================
-
+//SOLUCIOOOON No ensenar xd
 module vending_machine (
     input        clk,
     input        rst,
