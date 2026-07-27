@@ -21,7 +21,7 @@ class App:
         self.sel = self.tray = None
         self.stock = STOCK0[:]
 
-        root.title("Vending Verilog")
+        root.title("Expendedora Verilog")
         root.geometry(f"{CW + 780}x{CH + 16}")
         izq = tk.Frame(root, width=CW + 10)
         izq.pack(side="left", fill="y")
@@ -71,8 +71,8 @@ class App:
         self.editor.msg("Compilando y simulando...", "info")
         if self._correr():
             self.on = True
-            self.editor.msg("✔ Compilación exitosa: máquina encendida. "
-                            "Meté fichas y elegí un producto.", "ok")
+            self.editor.msg("Listooooo"
+                            "Meter dinero y elegir", "ok")
         else:
             self.on = False
         self.maq.draw()
@@ -83,7 +83,7 @@ class App:
             self.sim.events.pop()
             return
         if self.state["error"]:
-            self.editor.msg(f"Crédito: {self.state['credito']} — ⚠ flag "
+            self.editor.msg(f"Crédito: {self.state['credito']} — flag "
                             "ERROR: la suma se pasó de 7 (overflow evitado).",
                             "err")
         else:
@@ -103,7 +103,7 @@ class App:
 
     def comprar(self):
         if self.sel is None:
-            self.editor.msg("Primero hacé click en un producto.", "err")
+            self.editor.msg("selecciona un producto", "err")
             return
         i = self.sel
         self.sim.events.extend(self._sel_bytes(i))
@@ -114,15 +114,15 @@ class App:
         if self.state["dispensed"][-1]:
             self._recontar()
             self.tray = i
-            self.editor.msg(f"✔ Dispensado: {NAMES[i]}. "
+            self.editor.msg(f"Entregado: {NAMES[i]}. "
                             f"Vuelto: {self.state['vuelto']}.", "ok")
             self.maq.draw()
             self.maq.caer(i)
             return
         motivo = "slot AGOTADO" if self.stock[i] == 0 else \
             f"crédito insuficiente ({self.state['credito']} < {PRICES[i]})"
-        self.editor.msg(f"✘ No se dispensó: {motivo}. ⚠ flag ERROR encendido "
-                        "(resta negativa evitada). Tu crédito se conserva.",
+        self.editor.msg(f"ERROR {motivo}. flag ERROR encendido "
+                        "(resta negativa evitada). Tu dinero se conserva.",
                         "err")
         self.maq.draw()
 
@@ -136,7 +136,7 @@ class App:
         self.sim.events, self.sel, self.tray = [], None, None
         self.stock = STOCK0[:]
         self._correr()
-        self.editor.msg("Sesión reiniciada: máquina como nueva.", "info")
+        self.editor.msg("Reinicio hecho ", "info")
         self.maq.draw()
 
     def _recontar(self):
@@ -147,7 +147,7 @@ class App:
 
     def esqueleto(self):
         self.editor.poner(open(SKELETON, encoding="utf-8").read())
-        self.editor.msg("Esqueleto cargado: completá los TODO y compilá.",
+        self.editor.msg("Codigo base cargado, termina tu .v jsj",
                         "info")
 
     def ondas(self):
@@ -156,10 +156,10 @@ class App:
             self.editor.msg(err, "err")
             return
         self.editor.msg("GTKWave abierto con la historia de tu sesión. "
-                        "Mirá: 'credito' sube con cada ficha (y se satura "
+                        "Mira el: 'dinero' sube con cada ficha (y se satura "
                         "en 7), 'motor_on' pulsa UN ciclo al comprar, y "
-                        "'error' se enciende en overflow o resta inválida. "
-                        "Cada click nuevo re-simula: reabrí Señales para "
+                        "'error' se enciende en overflow o resta negativa. "
+                        "Cada click nuevo re-simula: reabre las Señales para "
                         "actualizar.", "info")
 
 

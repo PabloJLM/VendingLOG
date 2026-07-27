@@ -5,11 +5,9 @@ import subprocess
 from config import GTKWAVE_DIRS
 from logica import FLAGS
 
-NO_GTKWAVE = ("No encontré GTKWave.\nCopiá su carpeta dentro del proyecto "
-              "(ver GTKWAVE_DIRS en config.py) o instalalo desde "
-              "https://sourceforge.net/projects/gtkwave/files/")
-
-SENALES = """[dumpfile] "{vcd}"
+NO_GTKWAVE = ("No esta gtkwwave hay que descargarlo")
+#leo senales 
+SENALES = """[dumpfile] "{vcd}" 
 [size] 1100 650
 @28
 testbench.clk

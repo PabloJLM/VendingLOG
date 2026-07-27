@@ -13,7 +13,7 @@ class Editor:
                         padx=8, pady=6)
         self.bar = tk.Frame(self.frame)
         self.bar.pack(fill="x")
-        self.lbl = tk.Label(self.bar, text="Tu módulo Verilog",
+        self.lbl = tk.Label(self.bar, text="IDE editable, FIT XVII",
                             font=("Segoe UI", 11, "bold"))
         self.lbl.pack(side="left")
         self.btns = [self._btn(t, c) for t, c in [
