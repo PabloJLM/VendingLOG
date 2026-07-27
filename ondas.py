@@ -43,7 +43,7 @@ def open_gtkwave(sim):
     if not exe:
         return NO_GTKWAVE
     if not (sim and os.path.isfile(sim.vcd)):
-        return "Todavía no hay ondas: compilá y usá la máquina primero."
+        return "Todavia no hay ondas: compila y usa la maquina primero."
     gtkw = os.path.join(sim.wd, "wave.gtkw")
     with open(gtkw, "w") as f:
         f.write(SENALES.format(vcd=sim.vcd.replace("\\", "\\\\")))

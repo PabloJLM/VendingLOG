@@ -69,11 +69,10 @@ class App:
     def compilar(self):
         self.sim = Sim(self.editor.codigo())
         self.sel, self.tray, self.stock = None, None, STOCK0[:]
-        self.editor.msg("Compilando y simulando...", "info")
+        self.editor.msg("Compilando...", "info")
         if self._correr():
             self.on = True
-            self.editor.msg("Listooooo"
-                            "Meter dinero y elegir", "ok")
+            self.editor.msg("Listo. Prueba", "ok")
         else:
             self.on = False
         self.maq.draw()
@@ -84,27 +83,26 @@ class App:
             self.sim.events.pop()
             return
         if self.state["error"]:
-            self.editor.msg(f"Crédito: {self.state['credito']} — flag "
-                            "ERROR: la suma se pasó de 7 (overflow evitado).",
-                            "err")
+            self.editor.msg(f"Credito: {self.state['credito']} "
+                            "(overflow, se saturo en 7)", "err")
         else:
-            self.editor.msg(f"Crédito: {self.state['credito']}", "info")
+            self.editor.msg(f"Credito: {self.state['credito']}", "info")
         self.maq.draw()
 
     def elegir(self, i):
         self.sel = i
         self.sim.events.extend(self._sel_bytes(i))
         if self._correr():
-            listo = "sí" if self.state["listo"] else "todavía no"
-            self.editor.msg(f"Elegiste {NAMES[i]} ($ {PRICES[i]}). "
-                            f"¿Alcanza el crédito?: {listo}.", "info")
+            listo = "si" if self.state["listo"] else "no"
+            self.editor.msg(f"{NAMES[i]} (Q {PRICES[i]}) - "
+                            f"alcanza?: {listo}", "info")
         else:
             self.sim.events = self.sim.events[:-2]
         self.maq.draw()
 
     def comprar(self):
         if self.sel is None:
-            self.editor.msg("selecciona un producto", "err")
+            self.editor.msg("Elegi un producto primero", "err")
             return
         i = self.sel
         self.sim.events.extend(self._sel_bytes(i))
@@ -115,21 +113,18 @@ class App:
         if self.state["dispensed"][-1]:
             self._recontar()
             self.tray = i
-            self.editor.msg(f"Entregado: {NAMES[i]}. "
-                            f"Vuelto: {self.state['vuelto']}.", "ok")
+            self.editor.msg(f"Entregado: {NAMES[i]} "
+                            f"(vuelto: {self.state['vuelto']})", "ok")
             self.maq.draw()
             self.maq.caer(i)
             return
-        motivo = "slot AGOTADO" if self.stock[i] == 0 else \
-            f"crédito insuficiente ({self.state['credito']} < {PRICES[i]})"
-        self.editor.msg(f"ERROR {motivo}. flag ERROR encendido "
-                        "(resta negativa evitada). Tu dinero se conserva.",
-                        "err")
+        motivo = "sin stock" if self.stock[i] == 0 else "credito insuficiente"
+        self.editor.msg(f"No se pudo: {motivo}. Dinero conservado.", "err")
         self.maq.draw()
 
     def retirar(self):
         if self.tray is not None:
-            self.editor.msg(f"Retiraste {NAMES[self.tray]}. ¡Provecho!", "ok")
+            self.editor.msg(f"Retiraste {NAMES[self.tray]}", "ok")
             self.tray = None
             self.maq.draw()
 
@@ -137,7 +132,7 @@ class App:
         self.sim.events, self.sel, self.tray = [], None, None
         self.stock = STOCK0[:]
         self._correr()
-        self.editor.msg("Reinicio hecho ", "info")
+        self.editor.msg("Sesion reiniciada", "info")
         self.maq.draw()
 
     def _recontar(self):
@@ -148,20 +143,15 @@ class App:
 
     def esqueleto(self):
         self.editor.poner(open(SKELETON, encoding="utf-8").read())
-        self.editor.msg("Codigo base cargado, termina tu .v jsj",
-                        "info")
+        self.editor.msg("Codigo base cargado", "info")
 
     def ondas(self):
         err = open_gtkwave(self.sim)
         if err:
             self.editor.msg(err, "err")
             return
-        self.editor.msg("GTKWave abierto con la historia de tu sesión. "
-                        "Mira el: 'dinero' sube con cada ficha (y se satura "
-                        "en 7), 'motor_on' pulsa UN ciclo al comprar, y "
-                        "'error' se enciende en overflow o resta negativa. "
-                        "Cada click nuevo re-simula: reabre las Señales para "
-                        "actualizar.", "info")
+        self.editor.msg("GTKWave abierto. Volve a apretar Senales "
+                        "para ver los cambios mas recientes.", "info")
 
 
 if __name__ == "__main__":

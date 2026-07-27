@@ -11,7 +11,7 @@ module vending_machine (
     output reg [2:0] credito,
     output reg       listo,
     output reg [2:0] vuelto,
-    output reg       error     // flag: overflow o resta inválida
+    output reg       error     // flag: overflow o resta invalida
 );
 
     // Precio de cada producto (case de la vending)
@@ -24,7 +24,7 @@ module vending_machine (
             4'd3: precio = 3'd1;   // Chicle
             4'd4: precio = 3'd4;   // Agua
             4'd5: precio = 3'd7;   // Chocolate
-            4'd6: precio = 3'd6;   // Café
+            4'd6: precio = 3'd6;   // Cafe
             4'd7: precio = 3'd2;   // Caramelo
             4'd8: precio = 3'd3;   // Jugo
             default: precio = 3'd7;
@@ -62,7 +62,7 @@ module vending_machine (
                     error    <= 1'b0;
                 end else begin
                     error <= 1'b1;        // flag: resta negativa o sin stock
-                end                       // el crédito se conserva
+                end                       // el credito se conserva
             end
         end
     end

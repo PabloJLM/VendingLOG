@@ -50,12 +50,12 @@ class Maquina(tk.Canvas):
         else:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26,
                   fill=t["fondo_editor"], outline=edge, width=2)
-        self.create_text(CW / 2, 30, text="VENDING VERILOG", fill=acc,
+        self.create_text(CW / 2, 30, text="FIT XVII", fill=acc,
                          font=FUENTE_TITULO)
 
         rrect(self, GX, 48, GX + 250, 88, r=14, fill=panel, outline=edge)
         self.create_text(GX + 14, 68, anchor="w",
-                         text=f"CRÉDITO {st['credito'] if st else 0}",
+                         text=f"CREDITO {st['credito'] if st else 0}",
                          fill=a.hl("inmediatos"), font=FUENTE_LCD)
         self.create_text(GX + 140, 68, anchor="w",
                          text=f"VUELTO {st['vuelto'] if st else 0}",
@@ -77,19 +77,19 @@ class Maquina(tk.Canvas):
 
         self._bandeja(panel, edge, muted)
 
-        self.create_text(CW - GX, CH - 22, anchor="e", text="reiniciar sesión",
+        self.create_text(CW - GX, CH - 22, anchor="e", text="reiniciar sesion",
                          fill=muted, font=("Segoe UI", 9, "underline"))
         self._zona(CW - GX - 110, CH - 34, CW - GX, CH - 10, a.reiniciar)
 
         if not a.on:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26, fill=t["fondo_app"],
                   stipple="gray50", outline="")
-            self.create_text(CW / 2, CH / 2 - 10, text="MÁQUINA APAGADA",
+            self.create_text(CW / 2, CH / 2 - 10, text="MAQUINA APAGADA",
                              fill=t["texto_editor"],
                              font=("Courier New", 14, "bold"))
             self.create_text(CW / 2, CH / 2 + 16, fill=muted,
                              font=("Segoe UI", 10),
-                             text="Compilá tu módulo y se encenderá")
+                             text="Compila tu modulo y se encendera")
 
     def _led(self, x, texto, color, encendido, panel, edge, muted):
         self.create_oval(x, 52, x + 32, 84, fill=color if encendido else panel,
@@ -121,8 +121,7 @@ class Maquina(tk.Canvas):
                          fill=t["texto_editor"] if ok else muted,
                          font=("Segoe UI", 9))
         self.create_text(x + CELL_W / 2, y + 82,
-                         text=f"$ {PRICES[i]}  ·  {a.stock[i]}" if ok
-                         else "AGOTADO",
+                         text=f"Q {PRICES[i]}" if ok else "AGOTADO",
                          fill=a.hl("registros") if ok else muted,
                          font=("Segoe UI", 9, "bold"))
         self._zona(x, y, x + CELL_W, y + CELL_H, lambda: a.elegir(i))

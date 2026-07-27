@@ -30,7 +30,7 @@ class Editor:
         self.btn_opciones = self._btn("⚙", self._toggle_opciones)
         self.btns = [self.btn_opciones] + [self._btn(t, c) for t, c in [
             ("Compilar y correr", app.compilar),
-            ("Señales", app.ondas),
+            ("Senales", app.ondas),
             ("Abrir .v", self.abrir),
             ("Guardar .v", self.guardar),
             ("Esqueleto", app.esqueleto)]]
@@ -133,7 +133,7 @@ class Editor:
               self.app.cambiar_tema)
         campo("Fuente", FUENTES, self.fuente[0],
               lambda v: self._set_fuente(familia=v))
-        campo("Tamaño", TAMANOS, self.fuente[1],
+        campo("Tamano", TAMANOS, self.fuente[1],
               lambda v: self._set_fuente(tamano=int(v)))
 
         tk.Button(win, text="Cerrar", command=self._toggle_opciones,

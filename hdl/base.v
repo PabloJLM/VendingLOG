@@ -7,15 +7,15 @@ module vending_machine (
     input        hay_stock,    // 1 = el producto elegido tiene stock
     input        btn_comprar,  // pulso: confirmar compra
     output reg       motor_on, // pulso: dispensar
-    output reg [2:0] credito,  // crédito acumulado (máximo 7)
-    output reg       listo,    // 1 = el crédito alcanza el precio
-    output reg [2:0] vuelto,   // vuelto de la última compra
-    output reg       error     // flag: overflow o resta inválida
+    output reg [2:0] credito,  // credito acumulado (maximo 7)
+    output reg       listo,    // 1 = el credito alcanza el precio
+    output reg [2:0] vuelto,   // vuelto de la ultima compra
+    output reg       error     // flag: overflow o resta invalida
 );
 
-    // 1. Precio de cada producto — completá el case:
+    // 1. Precio de cada producto - completa el case:
     //    0 Chips $2 | 1 Galletas $3 | 2 Soda $5 | 3 Chicle $1 | 4 Agua $4
-    //    5 Chocolate $7 | 6 Café $6 | 7 Caramelo $2 | 8 Jugo $3
+    //    5 Chocolate $7 | 6 Cafe $6 | 7 Caramelo $2 | 8 Jugo $3
     reg [2:0] precio;
     always @* begin
         case (producto)
@@ -39,7 +39,7 @@ module vending_machine (
         end else begin
             // TODO: motor_on debe ser un pulso de UN solo ciclo.
 
-            // TODO 2: fichas con saturación en 7 + flag error si hay overflow.
+            // TODO 2: fichas con saturacion en 7 + flag error si hay overflow.
 
             // TODO 3: compra validando ANTES de restar + flag error.
 

@@ -21,7 +21,7 @@ GTKWAVE_DIRS = [
 ]
 
 # Productos por slot (0..8). Los precios deben coincidir con el case del .v
-NAMES  = ["Chips", "Galletas", "Soda", "Chicle", "Agua",
-          "Chocolate", "Café", "Caramelo", "Jugo"]
+NAMES  = ["Papas", "2", "Iris Out", "MONSTER<3", "Cupcake",
+          "Agua", "Miku", "Galletas", "Jugo"]
 PRICES = [2, 3, 5, 1, 4, 7, 6, 2, 3]
 STOCK0 = [3, 2, 2, 3, 1, 2, 0, 3, 2]

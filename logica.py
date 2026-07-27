@@ -9,19 +9,19 @@ from config import HDL, IVERILOG_DIRS
 
 FLAGS = 0x08000000 if os.name == "nt" else 0
 
-NO_IV = ("No encontré Icarus Verilog.\nInstalalo desde "
-         "https://bleyer.org/icarus/ (marcá 'agregar al PATH') y reabrí "
-         "la aplicación.")
+NO_IV = ("No encontre Icarus Verilog.\nInstalalo desde "
+         "https://bleyer.org/icarus/ (marca 'agregar al PATH') y reabri "
+         "la aplicacion.")
 
 HINTS = [
     (r"does not have any delay|infinite loop",
-     "Ese 'always' se repetiría infinito. Usá 'always @(posedge clk)' o 'always @*'."),
-    (r"syntax error", "Revisá si falta un ';' o un 'begin'/'end' sin cerrar."),
-    (r"Unknown module type", "No cambies el nombre del módulo 'vending_machine'."),
+     "Ese 'always' se repetiria infinito. Usa 'always @(posedge clk)' o 'always @*'."),
+    (r"syntax error", "Revisa si falta un ';' o un 'begin'/'end' sin cerrar."),
+    (r"Unknown module type", "No cambies el nombre del modulo 'vending_machine'."),
     (r"not a valid l-value|is not a register",
-     "En un 'always' solo se asigna a señales tipo 'reg'."),
+     "En un 'always' solo se asigna a senales tipo 'reg'."),
     (r"is not declared|Unable to bind",
-     "Señal no declarada (ojo: Verilog distingue mayúsculas/minúsculas)."),
+     "Senal no declarada (ojo: Verilog distingue mayusculas/minusculas)."),
 ]
 
 
@@ -43,10 +43,10 @@ def nice_error(raw):
         if not m or (m.group(2), m.group(3)) in seen:
             continue
         seen.add((m.group(2), m.group(3)))
-        hint = next(("\n   → " + h for p, h in HINTS if re.search(p, ln, re.I)), "")
-        out.append(f" Línea {m.group(2)}: {m.group(3) or 'error de sintaxis'}{hint}")
-    return ("Errores de compilación:\n" + "\n".join(out[:10])) if out \
-        else "Error de compilación:\n" + raw[:800]
+        hint = next(("\n   -> " + h for p, h in HINTS if re.search(p, ln, re.I)), "")
+        out.append(f" Linea {m.group(2)}: {m.group(3) or 'error de sintaxis'}{hint}")
+    return ("Errores de compilacion:\n" + "\n".join(out[:10])) if out \
+        else "Error de compilacion:\n" + raw[:800]
 
 
 class Sim:
@@ -70,7 +70,7 @@ class Sim:
                                capture_output=True, text=True, timeout=20,
                                creationflags=FLAGS)
         except subprocess.TimeoutExpired:
-            return {"status": "err", "msg": "La compilación tardó demasiado."}
+            return {"status": "err", "msg": "La compilacion tardo demasiado."}
         if c.returncode:
             return {"status": "err",
                     "msg": nice_error((c.stderr or "") + (c.stdout or ""))}
@@ -79,10 +79,10 @@ class Sim:
                                capture_output=True, text=True, timeout=10,
                                creationflags=FLAGS)
         except subprocess.TimeoutExpired:
-            return {"status": "err", "msg": "La simulación no terminó: "
-                    "probable loop infinito. Revisá tus 'always'."}
+            return {"status": "err", "msg": "La simulacion no termino: "
+                    "probable loop infinito. Revisa tus 'always'."}
         if s.returncode or "TB_DONE" not in (s.stdout or ""):
-            return {"status": "err", "msg": "La simulación se detuvo de forma "
+            return {"status": "err", "msg": "La simulacion se detuvo de forma "
                     "inesperada:\n" + (s.stderr or s.stdout or "")[:400]}
         return self._parse()
 
@@ -99,7 +99,7 @@ class Sim:
         except OSError:
             pass
         if not rows:
-            return {"status": "err", "msg": "La simulación no dio resultados."}
+            return {"status": "err", "msg": "La simulacion no dio resultados."}
         disp = [any(r["motor_on"] for r in rows if r["event"] == i)
                 for i in range(len(self.events))]
         last = rows[-1]
