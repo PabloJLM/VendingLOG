@@ -1,11 +1,8 @@
-# GTKWave viene embebido para los estudiantes, no hace falta versionarlo
 gtkwave-3.3.100-bin-win64/
 gtkwave64/
 
-# Python
 __pycache__/
 *.pyc
 
-# basura de OS
 Thumbs.db
 .DS_Store
