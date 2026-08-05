@@ -1,10 +1,12 @@
 import tkinter as tk
 
-from config import NAMES, PRICES
-from estilos import (CELL_H, CELL_W, CH, CW, FUENTE_CHICA, FUENTE_LCD,
-                     FUENTE_TITULO, FUENTE_UI, GAP, GX, GY, SELECCION, TRAY,
-                     rrect)
+from config import NAMES
+from estilos import (BOTON_Y, CENTRO, CH, CONT_GAP, CONT_H, CONT_W, CONT_Y,
+                     CW, FUENTE_CHICA, FUENTE_TITULO, FUENTE_UI, MOTOR_H,
+                     SELECCION, TRAY, rrect)
 import imagenes
+
+COLORES = ["#e74c3c", "#2ecc71", "#3498db"]   # fallback si no hay imagen
 
 
 class Maquina(tk.Canvas):
@@ -16,9 +18,15 @@ class Maquina(tk.Canvas):
         self.img, self.big = imagenes.cargar()
         self.hot = []
 
-    def _celda(self, i):
-        r, c = divmod(i, 3)
-        return GX + c * (CELL_W + GAP), GY + r * (CELL_H + GAP)
+    # ---- geometria ---------------------------------------------------
+    def _cont(self, i):
+        total = 3 * CONT_W + 2 * CONT_GAP
+        x = (CW - total) / 2 + i * (CONT_W + CONT_GAP)
+        return x, CONT_Y, x + CONT_W, CONT_Y + CONT_H
+
+    def _salida(self, i):
+        x1, y1, x2, y2 = self._cont(i)
+        return (x1 + x2) / 2, y2 + MOTOR_H + 6
 
     def _zona(self, x1, y1, x2, y2, cmd):
         self.hot.append((x1, y1, x2, y2, cmd))
@@ -37,8 +45,9 @@ class Maquina(tk.Canvas):
                          font=FUENTE_UI)
         self._zona(x1, y1, x2, y2, cmd)
 
+    # ---- dibujo ------------------------------------------------------
     def draw(self):
-        a, t, st = self.app, self.app.T, self.app.state
+        a, t = self.app, self.app.T
         panel, edge = t["fondo_consola"], t["tab_sel"]
         acc, muted = a.hl("instrucciones"), a.hl("comentarios")
         self.configure(bg=t["fondo_app"])
@@ -50,36 +59,23 @@ class Maquina(tk.Canvas):
         else:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26,
                   fill=t["fondo_editor"], outline=edge, width=2)
-        self.create_text(CW / 2, 30, text="FIT XVII", fill=acc,
+        self.create_text(CW / 2, 32, text="CHICLERA VERILOG", fill=acc,
                          font=FUENTE_TITULO)
 
-        rrect(self, GX, 48, GX + 250, 88, r=14, fill=panel, outline=edge)
-        self.create_text(GX + 14, 68, anchor="w",
-                         text=f"CREDITO {st['credito'] if st else 0}",
-                         fill=a.hl("inmediatos"), font=FUENTE_LCD)
-        self.create_text(GX + 140, 68, anchor="w",
-                         text=f"VUELTO {st['vuelto'] if st else 0}",
-                         fill=a.hl("registros"), font=FUENTE_LCD)
-        self._led(GX + 276, "LISTO", a.hl("inmediatos"),
-                  bool(st and st["listo"] and a.sel is not None), panel, edge, muted)
-        self._led(GX + 320, "ERROR", a.hl("registros"),
-                  bool(st and st["error"]), panel, edge, muted)
-
-        for i in range(9):
-            self._slot(i, panel, edge, acc, muted, t)
-
-        self._pill(GX, 428, GX + 92, 462, "FICHA 1", a.hl("etiquetas"),
-                   lambda: a.ficha(0x10))
-        self._pill(GX + 100, 428, GX + 192, 462, "FICHA 5",
-                   a.hl("registros"), lambda: a.ficha(0x20))
-        self._pill(GX + 202, 428, CW - GX, 462, "COMPRAR",
-                   a.hl("inmediatos"), a.comprar, fg=t["fondo_app"])
+        self._rampas(edge, muted)
+        for i in range(3):
+            self._contenedor(i, panel, edge, muted, t)
 
         self._bandeja(panel, edge, muted)
 
-        self.create_text(CW - GX, CH - 22, anchor="e", text="reiniciar sesion",
+        self._pill(66, BOTON_Y, 286, BOTON_Y + 36, "METER MONEDA",
+                   a.hl("inmediatos"), a.moneda, fg=t["fondo_app"])
+        self._led(330, BOTON_Y + 3, "EXITO", a.hl("inmediatos"),
+                  a.ultimo_exito, panel, edge, muted)
+
+        self.create_text(CW - 26, 32, anchor="e", text="reiniciar",
                          fill=muted, font=("Segoe UI", 9, "underline"))
-        self._zona(CW - GX - 110, CH - 34, CW - GX, CH - 10, a.reiniciar)
+        self._zona(CW - 90, 20, CW - 22, 44, a.reiniciar)
 
         if not a.on:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26, fill=t["fondo_app"],
@@ -89,42 +85,67 @@ class Maquina(tk.Canvas):
                              font=("Courier New", 14, "bold"))
             self.create_text(CW / 2, CH / 2 + 16, fill=muted,
                              font=("Segoe UI", 10),
-                             text="Compila tu modulo y se encendera")
+                             text="Compila tu control.v y se encendera")
 
-    def _led(self, x, texto, color, encendido, panel, edge, muted):
-        self.create_oval(x, 52, x + 32, 84, fill=color if encendido else panel,
-                         outline=edge, width=2)
-        self.create_text(x + 16, 94, text=texto, fill=muted,
-                         font=("Segoe UI", 7))
+    def _rampas(self, edge, muted):
+        """Las 3 rampas que llevan del contenedor al punto central."""
+        cx, cy = CENTRO
+        for i in range(3):
+            sx, sy = self._salida(i)
+            self.create_line(sx, sy, cx, cy, fill=edge, width=6,
+                             capstyle="round")
+            self.create_line(sx, sy, cx, cy, fill=muted, width=2,
+                             capstyle="round")
+        # embudo central + tubo hacia la bandeja
+        self.create_polygon(cx - 34, cy - 12, cx + 34, cy - 12,
+                            cx + 13, cy + 26, cx - 13, cy + 26,
+                            fill="", outline=edge, width=3)
+        self.create_line(cx, cy + 26, cx, TRAY[1], fill=edge, width=3)
 
-    def _slot(self, i, panel, edge, acc, muted, t):
+    def _contenedor(self, i, panel, edge, muted, t):
         a = self.app
-        x, y = self._celda(i)
-        ok = a.stock[i] > 0
-        if i == a.sel:
-            rrect(self, x - 5, y - 5, x + CELL_W + 5, y + CELL_H + 5, r=18,
+        x1, y1, x2, y2 = self._cont(i)
+        sel = (i == a.sel)
+        if sel:
+            rrect(self, x1 - 5, y1 - 5, x2 + 5, y2 + MOTOR_H + 5, r=20,
                   fill="", outline=SELECCION[0], width=3)
-            rrect(self, x - 2, y - 2, x + CELL_W + 2, y + CELL_H + 2, r=16,
+            rrect(self, x1 - 2, y1 - 2, x2 + 2, y2 + MOTOR_H + 2, r=18,
                   fill="", outline=SELECCION[1], width=1)
-        rrect(self, x, y, x + CELL_W, y + CELL_H, r=14, fill=panel,
-              outline=SELECCION[0] if i == a.sel else edge,
-              width=2 if i == a.sel else 1)
-        if i in self.img:
-            self.create_image(x + CELL_W / 2, y + 32, image=self.img[i])
-        else:
-            rrect(self, x + 34, y + 10, x + CELL_W - 34, y + 50, r=10,
-                  fill=a.hl("etiquetas") if ok else muted)
-        if not ok:
-            rrect(self, x + 2, y + 2, x + CELL_W - 2, y + 58, r=12,
-                  fill=t["fondo_app"], stipple="gray50", outline="")
-        self.create_text(x + CELL_W / 2, y + 64, text=NAMES[i],
-                         fill=t["texto_editor"] if ok else muted,
-                         font=("Segoe UI", 9))
-        self.create_text(x + CELL_W / 2, y + 82,
-                         text=f"Q {PRICES[i]}" if ok else "AGOTADO",
-                         fill=a.hl("registros") if ok else muted,
-                         font=("Segoe UI", 9, "bold"))
-        self._zona(x, y, x + CELL_W, y + CELL_H, lambda: a.elegir(i))
+
+        # tolva del contenedor
+        rrect(self, x1, y1, x2, y2, r=14, fill=panel,
+              outline=SELECCION[0] if sel else edge, width=2 if sel else 1)
+        # chicles apilados adentro
+        cx = (x1 + x2) / 2
+        for k, (dx, dy) in enumerate(((-24, 40), (24, 40), (0, 78),
+                                      (-24, 112), (24, 112))):
+            if i in self.img:
+                self.create_image(cx + dx, y1 + dy, image=self.img[i])
+            else:
+                self.create_oval(cx + dx - 17, y1 + dy - 17,
+                                 cx + dx + 17, y1 + dy + 17,
+                                 fill=COLORES[i], outline="")
+        self.create_text(cx, y1 + 16, text=f"{NAMES[i]}  (color {i})",
+                         fill=t["texto_editor"], font=("Segoe UI", 9, "bold"))
+
+        # stepper de este contenedor
+        my1, my2 = y2, y2 + MOTOR_H
+        girando = (a.motor_activo == i)
+        rrect(self, x1 + 14, my1, x2 - 14, my2, r=10,
+              fill=a.hl("registros") if girando else panel,
+              outline=edge, width=1)
+        self.create_text(cx, (my1 + my2) / 2,
+                         text=f"STEPPER {i + 1}",
+                         fill=t["fondo_app"] if girando else muted,
+                         font=("Segoe UI", 8, "bold"))
+        self._zona(x1, y1, x2, my2, lambda: a.elegir(i))
+
+    def _led(self, x, y, texto, color, encendido, panel, edge, muted):
+        self.create_oval(x, y, x + 30, y + 30,
+                         fill=color if encendido else panel,
+                         outline=edge, width=2)
+        self.create_text(x + 15, y + 40, text=texto, fill=muted,
+                         font=("Segoe UI", 7))
 
     def _bandeja(self, panel, edge, muted):
         a = self.app
@@ -136,35 +157,45 @@ class Maquina(tk.Canvas):
         else:
             rrect(self, *TRAY, r=20, fill=panel, outline=edge, width=2)
         if a.tray is not None and not a.anim:
-            self._producto(bx, by - 8, a.tray)
-            self.create_text(bx, TRAY[3] - 14, text="click para retirar",
+            self._bola(bx, by - 6, a.tray)
+            self.create_text(bx, TRAY[3] - 12, text="click para retirar",
                              fill=muted, font=FUENTE_CHICA)
         elif "bandeja_0" not in self.big:
-            self.create_text(bx, TRAY[3] - 14, text="RETIRO", fill=muted,
+            self.create_text(bx, TRAY[3] - 12, text="RETIRO", fill=muted,
                              font=FUENTE_CHICA)
         self._zona(*TRAY, a.retirar)
 
-    def _producto(self, x, y, i):
+    def _bola(self, x, y, i):
         if i in self.img:
             self.create_image(x, y, image=self.img[i], tags="fall")
         else:
-            rrect(self, x - 24, y - 14, x + 24, y + 14, r=10,
-                  fill=self.app.hl("etiquetas"), outline="#ffffff",
-                  tags="fall")
+            self.create_oval(x - 17, y - 17, x + 17, y + 17,
+                             fill=COLORES[i], outline="#ffffff",
+                             tags="fall")
 
-    def caer(self, slot):
+    def caer(self, i):
+        """El chicle baja por la rampa del contenedor i y luego al centro."""
         self.app.anim = True
-        x0, y0 = (v + d for v, d in zip(self._celda(slot), (CELL_W / 2, 32)))
-        x1 = (TRAY[0] + TRAY[2]) / 2
-        y1 = (TRAY[1] + TRAY[3]) / 2 - 8
+        self.app.motor_activo = i
+        sx, sy = self._salida(i)
+        cx, cy = CENTRO
+        tx = (TRAY[0] + TRAY[2]) / 2
+        ty = (TRAY[1] + TRAY[3]) / 2 - 6
 
-        def paso(n=0, pasos=20):
+        def paso(n=0, pasos=30):
             self.delete("fall")
             if n > pasos:
                 self.app.anim = False
+                self.app.motor_activo = None
                 self.draw()
                 return
             t = n / pasos
-            self._producto(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t * t, slot)
+            if t < 0.55:                       # por la rampa al centro
+                u = t / 0.55
+                x, y = sx + (cx - sx) * u, sy + (cy - sy) * u
+            else:                              # caida al centro
+                u = (t - 0.55) / 0.45
+                x, y = cx + (tx - cx) * u, cy + (ty - cy) * u * u
+            self._bola(x, y, i)
             self.after(22, lambda: paso(n + 1))
         paso()

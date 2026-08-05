@@ -2,17 +2,20 @@ import os
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 
-# Rutasn---------------------------------------------------------------------------------------
+# Rutas ---------------------------------------------------------------
 HDL      = os.path.join(BASE, "hdl")
 IMG      = os.path.join(BASE, "img")
 BG       = os.path.join(BASE, "bg")
 TEMAS    = os.path.join(BASE, "temas.json")
-SKELETON = os.path.join(HDL, "base.v")
 
-# ruta de Icarus Verilog 
+# El estudiante edita control.v; stepper.v y top.v son fijos
+SKELETON = os.path.join(HDL, "control.v")
+RTL_FIJO = [os.path.join(HDL, "stepper.v"), os.path.join(HDL, "top.v")]
+
+# ruta de Icarus Verilog
 IVERILOG_DIRS = [r"C:\iverilog\bin", r"C:\Program Files\iverilog\bin"]
 
-# GTKWave 
+# GTKWave
 GTKWAVE_DIRS = [
     os.path.join(BASE, "gtkwave64", "bin"),
     os.path.join(BASE, "gtkwave-3.3.100-bin-win64", "gtkwave64", "bin"),
@@ -20,8 +23,5 @@ GTKWAVE_DIRS = [
     r"C:\Program Files\GTKWave\bin",
 ]
 
-# Productos por slot (0..8). Los precios deben coincidir con el case del .v
-NAMES  = ["Papas", "2", "Iris Out", "MONSTER<3", "Cupcake",
-          "Agua", "Miku", "Galletas", "Jugo"]
-PRICES = [2, 3, 5, 1, 4, 7, 6, 2, 3]
-STOCK0 = [3, 2, 2, 3, 1, 2, 0, 3, 2]
+# Los 3 colores de chicle (color 0, 1, 2 -> imagenes img/0.png, 1.png, 2.png)
+NAMES = ["Rojo", "Verde", "Azul"]

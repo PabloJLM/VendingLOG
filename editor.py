@@ -33,7 +33,7 @@ class Editor:
             ("Senales", app.ondas),
             ("Abrir .v", self.abrir),
             ("Guardar .v", self.guardar),
-            ("Esqueleto", app.esqueleto)]]
+            ("RTL original", app.esqueleto)]]
 
         cuerpo = tk.Frame(self.frame)
         cuerpo.pack(fill="both", expand=True, pady=(6, 0))

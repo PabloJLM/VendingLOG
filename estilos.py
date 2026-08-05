@@ -3,8 +3,14 @@ import json
 from config import TEMAS
 
 CW, CH = 460, 680
-GX, GY, CELL_W, CELL_H, GAP = 38, 105, 118, 96, 8
-TRAY = (105, 480, 355, 610)
+
+# 3 contenedores (uno por color), cada uno con su stepper debajo
+CONT_W, CONT_H, CONT_GAP = 124, 172, 14
+CONT_Y = 62                        # borde superior de los contenedores
+MOTOR_H = 34                       # caja del stepper bajo cada contenedor
+CENTRO = (230, 396)                # punto donde convergen las 3 rampas
+TRAY = (120, 470, 340, 580)        # bandeja central x1, y1, x2, y2
+BOTON_Y = 604                      # boton de moneda (debajo de la bandeja)
 SELECCION = ("#f9ca24", "#ffe082")
 
 FUENTE_TITULO = ("Courier New", 16, "bold")
@@ -13,8 +19,8 @@ FUENTE_UI     = ("Segoe UI", 10, "bold")
 FUENTE_CHICA  = ("Segoe UI", 8)
 FUENTE_EDITOR = ("Courier New", 11)
 
-FUENTES  = ["Courier New", "Consolas", "Lucida Console"]
-TAMANOS  = [9, 10, 11, 12, 13, 14, 16, 18]
+FUENTES = ["Courier New", "Consolas", "Lucida Console"]
+TAMANOS = [9, 10, 11, 12, 13, 14, 16, 18]
 
 FALLBACK = {"In the Pool": {
     "fondo_editor": "#101A24", "texto_editor": "#D7E3F4",

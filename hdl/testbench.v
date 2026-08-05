@@ -1,28 +1,45 @@
+// =====================================================================
+// testbench.v - Testbench fijo del simulador (el estudiante NO lo ve)
+//
+// Instancia el TOP completo (control del estudiante + 3 steppers) y
+// ademas EMULA LA PLANTA FISICA: cuando un motor termina de girar
+// (flanco de bajada de ocupado), la bola "cae" y se pulsa
+// sensor_salida, igual que haria el sensor optico real.
+//
+// events.hex: un byte por linea (nibble alto = opcode, bajo = arg)
+//   0x3c  color = c (0..2, queda fijo)
+//   0x1_  moneda: pulso de sensor_entrada + espera de la planta
+//   0xFF  fin
+//
+// output.csv: se escribe una fila SOLO cuando alguna senal cambia
+// (log compacto). Docente: "vvp sim.vvp +vcd" genera wave.vcd.
+// =====================================================================
 `timescale 1ns/1ps
 
 module testbench;
     localparam SETTLE = 2;
 
-    reg        clk = 0, rst = 1;
-    reg        ficha_1 = 0, ficha_5 = 0, btn_comprar = 0;
-    reg  [3:0] producto = 4'd15;
-    reg        hay_stock = 0;
-    wire       motor_on, listo, error;
-    wire [2:0] credito, vuelto;
+    reg        clk = 0, rst = 0;          // rst activo en BAJO (async)
+    reg        sensor_entrada = 0, sensor_salida = 0, dir_entrada = 0;
+    reg  [1:0] color = 2'b00;
+    wire       led, ocupado1, ocupado2, ocupado3;
+    wire       paso_pin1, paso_pin2, paso_pin3;
+    wire       dir_pin1, dir_pin2, dir_pin3;
 
-    vending_machine dut (
+    top dut (
         .clk(clk), .rst(rst),
-        .ficha_1(ficha_1), .ficha_5(ficha_5),
-        .producto(producto), .hay_stock(hay_stock),
-        .btn_comprar(btn_comprar),
-        .motor_on(motor_on), .credito(credito),
-        .listo(listo), .vuelto(vuelto), .error(error)
+        .sensor_entrada(sensor_entrada), .sensor_salida(sensor_salida),
+        .dir_entrada(dir_entrada), .color(color),
+        .led(led),
+        .ocupado1(ocupado1), .ocupado2(ocupado2), .ocupado3(ocupado3),
+        .paso_pin1(paso_pin1), .paso_pin2(paso_pin2), .paso_pin3(paso_pin3),
+        .dir_pin1(dir_pin1), .dir_pin2(dir_pin2), .dir_pin3(dir_pin3)
     );
 
     always #5 clk = ~clk;
 
     initial begin
-        #2000000;
+        #20000000;
         $display("TB_WATCHDOG_TIMEOUT");
         $finish;
     end
@@ -32,17 +49,38 @@ module testbench;
         $dumpvars(0, testbench);
     end
 
+    wire ocupado_any = ocupado1 | ocupado2 | ocupado3;
+
+    // el led de exito es un pulso combinacional muy corto (Mealy):
+    // lo capturamos con un registro para que no se pierda en el log
+    reg led_visto = 0, clr_led = 0;
+    always @(posedge clk) begin
+        if (clr_led)
+            led_visto <= 1'b0;
+        else if (led)
+            led_visto <= 1'b1;
+    end
+
     reg [7:0] events [0:1023];
     reg [7:0] ev;
-    integer   fd, i, j, cycle, ev_idx;
+    reg [6:0] vec, prev_vec;
+    integer   fd, i, j, t, cycle, ev_idx, prev_ev;
 
+    // un ciclo de reloj; escribe fila solo si algo cambio
     task step;
         begin
             @(posedge clk);
             #1;
             cycle = cycle + 1;
-            $fwrite(fd, "%0d,%0d,%b,%0d,%b,%0d,%b\n",
-                    cycle, ev_idx, motor_on, credito, listo, vuelto, error);
+            vec = {led_visto, ocupado1, ocupado2, ocupado3,
+                   sensor_salida, color};
+            if (vec !== prev_vec || ev_idx != prev_ev) begin
+                $fwrite(fd, "%0d,%0d,%b,%b,%b,%b,%b,%0d\n",
+                        cycle, ev_idx, led_visto, ocupado1, ocupado2,
+                        ocupado3, sensor_salida, color);
+                prev_vec = vec;
+                prev_ev  = ev_idx;
+            end
         end
     endtask
 
@@ -51,22 +89,45 @@ module testbench;
         $readmemh("events.hex", events);
 
         fd = $fopen("output.csv", "w");
-        $fwrite(fd, "cycle,event,motor_on,credito,listo,vuelto,error\n");
+        $fwrite(fd, "cycle,event,led,oc1,oc2,oc3,salida,color\n");
         cycle = 0;
         ev_idx = -1;
+        prev_ev = -2;
+        prev_vec = 7'h7f;
 
-        rst = 1; step; step;
-        rst = 0; step;
+        rst = 0; step; step;                 // reset activo en bajo
+        rst = 1; step;
 
         for (i = 0; i < 1024 && events[i] != 8'hFF; i = i + 1) begin
             ev_idx = i;
             ev = events[i];
             case (ev[7:4])
-                4'h1: begin ficha_1 = 1;     step; ficha_1 = 0;     end
-                4'h2: begin ficha_5 = 1;     step; ficha_5 = 0;     end
-                4'h3: producto = ev[3:0];
-                4'h5: hay_stock = ev[0];
-                4'h4: begin btn_comprar = 1; step; btn_comprar = 0; end
+                4'h3: color = ev[1:0];
+
+                4'h1: begin
+                    // limpiar la memoria del led de exito
+                    clr_led = 1; step; clr_led = 0;
+                    // moneda: pulso del sensor de entrada
+                    sensor_entrada = 1; step; step; sensor_entrada = 0;
+
+                    // planta: esperar a que algun motor arranque
+                    t = 0;
+                    while (!ocupado_any && t < 100) begin
+                        step; t = t + 1;
+                    end
+                    if (ocupado_any) begin
+                        // esperar a que el motor termine de girar
+                        t = 0;
+                        while (ocupado_any && t < 200000) begin
+                            step; t = t + 1;
+                        end
+                        // la bola cae hasta el sensor de salida
+                        repeat (10) step;
+                        sensor_salida = 1;
+                        repeat (3) step;
+                        sensor_salida = 0;
+                    end
+                end
                 default: ;
             endcase
             for (j = 0; j < SETTLE; j = j + 1) step;

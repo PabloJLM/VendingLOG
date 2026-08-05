@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 
-from config import NAMES, PRICES, SKELETON, STOCK0
+from config import NAMES, SKELETON
 from editor import Editor
 from estilos import CH, CW, load_themes
 from logica import NO_IV, Sim, toolchain
@@ -18,10 +18,10 @@ class App:
                           list(self.themes)[0])
         self.sim = self.state = None
         self.on = self.anim = False
-        self.sel = self.tray = None
-        self.stock = STOCK0[:]
+        self.sel = self.tray = self.motor_activo = None
+        self.ultimo_exito = False
 
-        root.title("Expendedora Verilog")
+        root.title("Chiclera Verilog")
         root.geometry(f"{CW + 780}x{CH + 16}")
         izq = tk.Frame(root, width=CW + 10)
         izq.pack(side="left", fill="y")
@@ -63,87 +63,72 @@ class App:
         self.state = res
         return res
 
-    def _sel_bytes(self, i):
-        return [{"b": 0x30 | i}, {"b": 0x50 | (1 if self.stock[i] > 0 else 0)}]
-
     def compilar(self):
         self.sim = Sim(self.editor.codigo())
-        self.sel, self.tray, self.stock = None, None, STOCK0[:]
+        self.sel = self.tray = self.motor_activo = None
+        self.ultimo_exito = False
         self.editor.msg("Compilando...", "info")
         if self._correr():
             self.on = True
-            self.editor.msg("Listo. Prueba", "ok")
+            self.editor.msg("Listo. Elegi un color y mete una moneda.", "ok")
         else:
             self.on = False
         self.maq.draw()
 
-    def ficha(self, byte):
-        self.sim.events.append({"b": byte})
-        if not self._correr():
-            self.sim.events.pop()
-            return
-        if self.state["error"]:
-            self.editor.msg(f"Credito: {self.state['credito']} "
-                            "(overflow, se saturo en 7)", "err")
-        else:
-            self.editor.msg(f"Credito: {self.state['credito']}", "info")
-        self.maq.draw()
-
     def elegir(self, i):
         self.sel = i
-        self.sim.events.extend(self._sel_bytes(i))
+        self.sim.events.append({"b": 0x30 | i})
         if self._correr():
-            listo = "si" if self.state["listo"] else "no"
-            self.editor.msg(f"{NAMES[i]} (Q {PRICES[i]}) - "
-                            f"alcanza?: {listo}", "info")
+            self.editor.msg(f"Color elegido: {NAMES[i]} ({i})", "info")
         else:
-            self.sim.events = self.sim.events[:-2]
+            self.sim.events.pop()
         self.maq.draw()
 
-    def comprar(self):
+    def moneda(self):
         if self.sel is None:
-            self.editor.msg("Elegi un producto primero", "err")
+            self.editor.msg("Elegi un color primero", "err")
             return
-        i = self.sel
-        self.sim.events.extend(self._sel_bytes(i))
-        self.sim.events.append({"b": 0x40, "slot": i})
+        self.sim.events.append({"b": 0x30 | self.sel})
+        self.sim.events.append({"b": 0x10})
         if not self._correr():
-            self.sim.events = self.sim.events[:-3]
+            self.sim.events = self.sim.events[:-2]
             return
-        if self.state["dispensed"][-1]:
-            self._recontar()
-            self.tray = i
-            self.editor.msg(f"Entregado: {NAMES[i]} "
-                            f"(vuelto: {self.state['vuelto']})", "ok")
+        motor = self.state["motor"][-1]
+        exito = self.state["exito"][-1]
+        self.ultimo_exito = exito
+        if motor is not None and exito:
+            self.tray = motor
+            self.editor.msg(f"Salio un chicle {NAMES[motor]} "
+                            f"(motor {motor + 1})", "ok")
             self.maq.draw()
-            self.maq.caer(i)
+            self.maq.caer(motor)
             return
-        motivo = "sin stock" if self.stock[i] == 0 else "credito insuficiente"
-        self.editor.msg(f"No se pudo: {motivo}. Dinero conservado.", "err")
+        if motor is not None:
+            self.editor.msg(f"El motor {motor + 1} giro pero el led de "
+                            "exito nunca prendio. Revisa el estado EXITO.",
+                            "err")
+        else:
+            self.editor.msg("Ningun motor arranco. Revisa tu FSM "
+                            "(estado INICIO y el case de color).", "err")
         self.maq.draw()
 
     def retirar(self):
         if self.tray is not None:
-            self.editor.msg(f"Retiraste {NAMES[self.tray]}", "ok")
+            self.editor.msg(f"Retiraste el chicle {NAMES[self.tray]}", "ok")
             self.tray = None
             self.maq.draw()
 
     def reiniciar(self):
-        self.sim.events, self.sel, self.tray = [], None, None
-        self.stock = STOCK0[:]
+        self.sim.events = []
+        self.sel = self.tray = self.motor_activo = None
+        self.ultimo_exito = False
         self._correr()
         self.editor.msg("Sesion reiniciada", "info")
         self.maq.draw()
 
-    def _recontar(self):
-        self.stock = STOCK0[:]
-        for e, d in zip(self.sim.events, self.state["dispensed"]):
-            if d and "slot" in e:
-                self.stock[e["slot"]] -= 1
-
     def esqueleto(self):
         self.editor.poner(open(SKELETON, encoding="utf-8").read())
-        self.editor.msg("Codigo base cargado", "info")
+        self.editor.msg("control.v original cargado", "info")
 
     def ondas(self):
         err = open_gtkwave(self.sim)

@@ -1,0 +1,13 @@
+Imagenes de la chiclera (todas opcionales; si falta alguna se dibuja
+un circulo de color). Se escalan solas manteniendo el aspect ratio.
+
+  0.png  chicle color 0 (tambien .gif/.jpg)
+  1.png  chicle color 1
+  2.png  chicle color 2
+  fondo.png      la maquina completa, ideal ~460x680
+  bandeja_0.png  bandeja de retiro vacia, ideal ~230x110
+  bandeja_1.png  bandeja entregando, ideal ~230x110
+
+Las imagenes 3.png a 8.png son de la version anterior y ya no se usan
+(se pueden borrar). Los nombres de los colores se cambian en config.py
+(NAMES). Para .jpg hace falta Pillow: pip install pillow

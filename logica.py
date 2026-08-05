@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import tempfile
 
-from config import HDL, IVERILOG_DIRS
+from config import HDL, IVERILOG_DIRS, RTL_FIJO
 
 FLAGS = 0x08000000 if os.name == "nt" else 0
 
@@ -17,7 +17,8 @@ HINTS = [
     (r"does not have any delay|infinite loop",
      "Ese 'always' se repetiria infinito. Usa 'always @(posedge clk)' o 'always @*'."),
     (r"syntax error", "Revisa si falta un ';' o un 'begin'/'end' sin cerrar."),
-    (r"Unknown module type", "No cambies el nombre del modulo 'vending_machine'."),
+    (r"Unknown module type",
+     "No cambies el nombre del modulo 'control' ni sus puertos."),
     (r"not a valid l-value|is not a register",
      "En un 'always' solo se asigna a senales tipo 'reg'."),
     (r"is not declared|Unable to bind",
@@ -52,7 +53,7 @@ def nice_error(raw):
 class Sim:
     def __init__(self, codigo):
         self.events = []
-        self.wd = tempfile.mkdtemp(prefix="vending_")
+        self.wd = tempfile.mkdtemp(prefix="chiclera_")
         self.src = os.path.join(self.wd, "estudiante.v")
         self.tb = os.path.join(HDL, "testbench.v")
         self.vcd = os.path.join(self.wd, "wave.vcd")
@@ -66,9 +67,10 @@ class Sim:
             f.write("".join(f"{e['b']:02x}\n" for e in self.events) + "ff\n")
         out = os.path.join(self.wd, "sim.vvp")
         try:
-            c = subprocess.run([iv, "-g2001", "-o", out, self.src, self.tb],
-                               capture_output=True, text=True, timeout=20,
-                               creationflags=FLAGS)
+            c = subprocess.run(
+                [iv, "-g2001", "-o", out, self.src] + RTL_FIJO + [self.tb],
+                capture_output=True, text=True, timeout=20,
+                creationflags=FLAGS)
         except subprocess.TimeoutExpired:
             return {"status": "err", "msg": "La compilacion tardo demasiado."}
         if c.returncode:
@@ -76,7 +78,7 @@ class Sim:
                     "msg": nice_error((c.stderr or "") + (c.stdout or ""))}
         try:
             s = subprocess.run([vp, out, "+vcd"], cwd=self.wd,
-                               capture_output=True, text=True, timeout=10,
+                               capture_output=True, text=True, timeout=15,
                                creationflags=FLAGS)
         except subprocess.TimeoutExpired:
             return {"status": "err", "msg": "La simulacion no termino: "
@@ -100,9 +102,14 @@ class Sim:
             pass
         if not rows:
             return {"status": "err", "msg": "La simulacion no dio resultados."}
-        disp = [any(r["motor_on"] for r in rows if r["event"] == i)
-                for i in range(len(self.events))]
-        last = rows[-1]
-        return {"status": "ok", "dispensed": disp,
-                "credito": last["credito"], "listo": last["listo"],
-                "vuelto": last["vuelto"], "error": last["error"]}
+
+        # por evento: que motor giro (0/1/2) y si la bola llego al sensor
+        motor, exito = [], []
+        for i in range(len(self.events)):
+            rr = [r for r in rows if r["event"] == i]
+            m = next((k for k in range(3)
+                      for r in rr if r[f"oc{k + 1}"]), None)
+            motor.append(m)
+            exito.append(any(r["led"] for r in rr))
+        return {"status": "ok", "motor": motor, "exito": exito,
+                "led": rows[-1]["led"]}
