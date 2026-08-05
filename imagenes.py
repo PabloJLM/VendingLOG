@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 
 from config import BG, IMG
-from estilos import CONT_W, TRAY
+from estilos import CONT_W, MOTOR_H, TRAY
 
 try:
     from PIL import Image, ImageTk
@@ -33,11 +33,16 @@ def cargar():
                     productos[i] = r
                 break
     tw, th = TRAY[2] - TRAY[0], TRAY[3] - TRAY[1]
+    mbox = (CONT_W - 26, MOTOR_H - 4)
     for name, box in (("fondo", (460, 680)), ("bandeja_0", (tw, th)),
-                      ("bandeja_1", (tw, th))):
-        p = os.path.join(IMG, f"{name}.png")
-        if os.path.isfile(p) and (r := _load(p, box)):
-            extras[name] = r
+                      ("bandeja_1", (tw, th)),
+                      ("stepper_1", mbox), ("stepper_2", mbox)):
+        for ext in ("png", "gif", "jpg", "jpeg"):
+            p = os.path.join(IMG, f"{name}.{ext}")
+            if os.path.isfile(p):
+                if (r := _load(p, box)):
+                    extras[name] = r
+                break
     return productos, extras
 
 

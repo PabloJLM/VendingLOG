@@ -16,6 +16,7 @@ class Maquina(tk.Canvas):
         self.pack(expand=True)
         self.bind("<Button-1>", self._click)
         self.img, self.big = imagenes.cargar()
+        self.frame = 0                 # alterna 0/1 para animar el stepper
         self.hot = []
 
     # ---- geometria ---------------------------------------------------
@@ -59,7 +60,7 @@ class Maquina(tk.Canvas):
         else:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26,
                   fill=t["fondo_editor"], outline=edge, width=2)
-        self.create_text(CW / 2, 32, text="CHICLERA VERILOG", fill=acc,
+        self.create_text(CW / 2, 32, text="expendedorajsjs", fill=acc,
                          font=FUENTE_TITULO)
 
         self._rampas(edge, muted)
@@ -131,14 +132,30 @@ class Maquina(tk.Canvas):
         # stepper de este contenedor
         my1, my2 = y2, y2 + MOTOR_H
         girando = (a.motor_activo == i)
-        rrect(self, x1 + 14, my1, x2 - 14, my2, r=10,
-              fill=a.hl("registros") if girando else panel,
-              outline=edge, width=1)
-        self.create_text(cx, (my1 + my2) / 2,
-                         text=f"STEPPER {i + 1}",
-                         fill=t["fondo_app"] if girando else muted,
-                         font=("Segoe UI", 8, "bold"))
+        if not self._tiene_motor_img():
+            rrect(self, x1 + 14, my1, x2 - 14, my2, r=10,
+                  fill=a.hl("registros") if girando else panel,
+                  outline=edge, width=1)
+            self.create_text(cx, (my1 + my2) / 2,
+                             text=f"STEPPER {i + 1}",
+                             fill=t["fondo_app"] if girando else muted,
+                             font=("Segoe UI", 8, "bold"))
+        else:
+            self._motor(i, self.frame if girando else 0)
         self._zona(x1, y1, x2, my2, lambda: a.elegir(i))
+
+    def _tiene_motor_img(self):
+        return "stepper_1" in self.big
+
+    def _motor(self, i, frame):
+        """Dibuja el stepper del contenedor i con el frame 0 o 1."""
+        key = f"stepper_{frame + 1}"
+        img = self.big.get(key) or self.big.get("stepper_1")
+        if not img:
+            return
+        x1, _, x2, y2 = self._cont(i)
+        self.create_image((x1 + x2) / 2, y2 + MOTOR_H / 2, image=img,
+                          tags=f"motor{i}")
 
     def _led(self, x, y, texto, color, encendido, panel, edge, muted):
         self.create_oval(x, y, x + 30, y + 30,
@@ -189,6 +206,11 @@ class Maquina(tk.Canvas):
                 self.app.motor_activo = None
                 self.draw()
                 return
+            # el stepper alterna sus 2 frames mientras el chicle baja
+            if self._tiene_motor_img() and n % 3 == 0:
+                self.frame ^= 1
+                self.delete(f"motor{i}")
+                self._motor(i, self.frame)
             t = n / pasos
             if t < 0.55:                       # por la rampa al centro
                 u = t / 0.55

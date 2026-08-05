@@ -7,7 +7,7 @@ CW, CH = 460, 680
 # 3 contenedores (uno por color), cada uno con su stepper debajo
 CONT_W, CONT_H, CONT_GAP = 124, 172, 14
 CONT_Y = 62                        # borde superior de los contenedores
-MOTOR_H = 34                       # caja del stepper bajo cada contenedor
+MOTOR_H = 52                       # caja del stepper bajo cada contenedor
 CENTRO = (230, 396)                # punto donde convergen las 3 rampas
 TRAY = (120, 470, 340, 580)        # bandeja central x1, y1, x2, y2
 BOTON_Y = 604                      # boton de moneda (debajo de la bandeja)

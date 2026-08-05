@@ -71,6 +71,10 @@ parte de la FSM revisar.
 - `0.png`, `1.png`, `2.png`: el chicle de cada color (cualquier
   tamano, se escala con aspect ratio). Se usan dentro de cada
   contenedor y en la animacion de caida.
+- `stepper_1.png` / `stepper_2.png` (~98x48): los dos frames del
+  motor. Se alternan mientras el stepper gira para simular el
+  movimiento circular; los 3 contenedores usan el mismo par. Sin
+  ellas se dibuja una cajita con el texto "STEPPER n".
 - `fondo.png` (~460x680), `bandeja_0.png` / `bandeja_1.png`
   (~230x110): opcionales, con fallback dibujado.
 - La carpeta `bg/` tiene los fondos del editor por tema (temas.json).
