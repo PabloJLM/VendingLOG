@@ -128,7 +128,7 @@ class App:
 
     def esqueleto(self):
         self.editor.poner(open(SKELETON, encoding="utf-8").read())
-        self.editor.msg("control.v original cargado", "info")
+        self.editor.msg("Esqueleto cargado: completa los TODO", "info")
 
     def ondas(self):
         err = open_gtkwave(self.sim)

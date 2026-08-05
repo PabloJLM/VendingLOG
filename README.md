@@ -53,7 +53,8 @@ parte de la FSM revisar.
 
 | Archivo | Responsabilidad |
 |---|---|
-| `hdl/control.v` | La FSM - LO QUE EDITA EL ESTUDIANTE (se carga al abrir) |
+| `hdl/esqueleto.v` | La FSM con TODOs - LO QUE COMPLETA EL ESTUDIANTE (se carga al abrir) |
+| `hdl/control.v` | La FSM resuelta - **solucion, no distribuir** |
 | `hdl/stepper.v` | Generador de pasos del motor (fijo, igual al hardware) |
 | `hdl/top.v` | Integra control + 3 steppers (fijo, igual al hardware) |
 | `hdl/testbench.v` | Fijo: reloj, eventos, emulacion de la planta, log, watchdog |
@@ -68,13 +69,25 @@ parte de la FSM revisar.
 
 ## Imagenes (carpeta img/)
 
-- `0.png`, `1.png`, `2.png`: el chicle de cada color (cualquier
-  tamano, se escala con aspect ratio). Se usan dentro de cada
-  contenedor y en la animacion de caida.
+Todas son opcionales: si falta alguna se dibuja una forma de color.
+
+Se escalan manteniendo el aspect ratio:
+
+- `0.png`, `1.png`, `2.png`: el chicle de cada color. Se usan dentro
+  de cada contenedor y en la animacion de caida.
 - `stepper_1.png` / `stepper_2.png` (~98x48): los dos frames del
-  motor. Se alternan mientras el stepper gira para simular el
-  movimiento circular; los 3 contenedores usan el mismo par. Sin
-  ellas se dibuja una cajita con el texto "STEPPER n".
+  motor, se alternan mientras gira para simular el movimiento
+  circular. Los 3 contenedores usan el mismo par.
+- `tolva.png` (~96x62): el embudo central donde caen los 3 tubos.
+- `fondo.png` (~460x680), `bandeja_0.png` / `bandeja_1.png` (~220x110).
+
+Se estiran al tamano exacto que pide la geometria (son piezas
+estructurales que tienen que calzar):
+
+- `rampa_0.png`, `rampa_1.png`, `rampa_2.png`: el tubo o rampa que
+  baja de cada contenedor a la tolva. La 0 va en diagonal hacia la
+  derecha, la 1 es vertical y la 2 en diagonal hacia la izquierda.
+- `tubo.png`: el tramo vertical de la tolva a la bandeja.
 - `fondo.png` (~460x680), `bandeja_0.png` / `bandeja_1.png`
   (~230x110): opcionales, con fallback dibujado.
 - La carpeta `bg/` tiene los fondos del editor por tema (temas.json).

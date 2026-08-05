@@ -3,10 +3,10 @@ import tkinter as tk
 from config import NAMES
 from estilos import (BOTON_Y, CENTRO, CH, CONT_GAP, CONT_H, CONT_W, CONT_Y,
                      CW, FUENTE_CHICA, FUENTE_TITULO, FUENTE_UI, MOTOR_H,
-                     SELECCION, TRAY, rrect)
+                     SELECCION, TOLVA_H, TOLVA_W, TRAY, TUBO_W, rrect)
 import imagenes
 
-COLORES = ["#e74c3c", "#2ecc71", "#3498db"]   # fallback si no hay imagen
+COLORES = ["#e74c3c", "#2ecc71", "#3498db"]
 
 
 class Maquina(tk.Canvas):
@@ -16,10 +16,24 @@ class Maquina(tk.Canvas):
         self.pack(expand=True)
         self.bind("<Button-1>", self._click)
         self.img, self.big = imagenes.cargar()
-        self.frame = 0                 # alterna 0/1 para animar el stepper
+        self.frame = 0
         self.hot = []
+        self._cargar_piezas()
 
-    # ---- geometria ---------------------------------------------------
+    # Rampas y tubo: dependen de la geometria, se cargan una sola vez
+    def _cargar_piezas(self):
+        self.piezas = {}
+        cx, cy = CENTRO
+        for i in range(3):
+            sx, sy = self._salida(i)
+            w = max(int(abs(cx - sx)) + 24, 30)
+            h = max(int(cy - sy), 20)
+            if (r := imagenes.cargar_pieza(f"rampa_{i}", (w, h))):
+                self.piezas[f"rampa_{i}"] = r
+        alto = int(TRAY[1] - (cy + TOLVA_H / 2 - 6))
+        if alto > 6 and (r := imagenes.cargar_pieza("tubo", (TUBO_W, alto))):
+            self.piezas["tubo"] = r
+
     def _cont(self, i):
         total = 3 * CONT_W + 2 * CONT_GAP
         x = (CW - total) / 2 + i * (CONT_W + CONT_GAP)
@@ -46,7 +60,6 @@ class Maquina(tk.Canvas):
                          font=FUENTE_UI)
         self._zona(x1, y1, x2, y2, cmd)
 
-    # ---- dibujo ------------------------------------------------------
     def draw(self):
         a, t = self.app, self.app.T
         panel, edge = t["fondo_consola"], t["tab_sel"]
@@ -60,7 +73,7 @@ class Maquina(tk.Canvas):
         else:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26,
                   fill=t["fondo_editor"], outline=edge, width=2)
-        self.create_text(CW / 2, 32, text="expendedorajsjs", fill=acc,
+        self.create_text(CW / 2, 32, text="CHICLERA VERILOG", fill=acc,
                          font=FUENTE_TITULO)
 
         self._rampas(edge, muted)
@@ -68,7 +81,6 @@ class Maquina(tk.Canvas):
             self._contenedor(i, panel, edge, muted, t)
 
         self._bandeja(panel, edge, muted)
-
         self._pill(66, BOTON_Y, 286, BOTON_Y + 36, "METER MONEDA",
                    a.hl("inmediatos"), a.moneda, fg=t["fondo_app"])
         self._led(330, BOTON_Y + 3, "EXITO", a.hl("inmediatos"),
@@ -89,19 +101,28 @@ class Maquina(tk.Canvas):
                              text="Compila tu control.v y se encendera")
 
     def _rampas(self, edge, muted):
-        """Las 3 rampas que llevan del contenedor al punto central."""
         cx, cy = CENTRO
         for i in range(3):
             sx, sy = self._salida(i)
-            self.create_line(sx, sy, cx, cy, fill=edge, width=6,
-                             capstyle="round")
-            self.create_line(sx, sy, cx, cy, fill=muted, width=2,
-                             capstyle="round")
-        # embudo central + tubo hacia la bandeja
-        self.create_polygon(cx - 34, cy - 12, cx + 34, cy - 12,
-                            cx + 13, cy + 26, cx - 13, cy + 26,
-                            fill="", outline=edge, width=3)
-        self.create_line(cx, cy + 26, cx, TRAY[1], fill=edge, width=3)
+            pieza = self.piezas.get(f"rampa_{i}")
+            if pieza:
+                self.create_image((sx + cx) / 2, (sy + cy) / 2, image=pieza)
+            else:
+                self.create_line(sx, sy, cx, cy, fill=edge, width=6,
+                                 capstyle="round")
+                self.create_line(sx, sy, cx, cy, fill=muted, width=2,
+                                 capstyle="round")
+        if (tubo := self.piezas.get("tubo")):
+            top = cy + TOLVA_H / 2 - 6
+            self.create_image(cx, (top + TRAY[1]) / 2, image=tubo)
+        else:
+            self.create_line(cx, cy + 26, cx, TRAY[1], fill=edge, width=3)
+        if "tolva" in self.big:
+            self.create_image(cx, cy, image=self.big["tolva"])
+        else:
+            self.create_polygon(cx - 34, cy - 12, cx + 34, cy - 12,
+                                cx + 13, cy + 26, cx - 13, cy + 26,
+                                fill="", outline=edge, width=3)
 
     def _contenedor(self, i, panel, edge, muted, t):
         a = self.app
@@ -112,14 +133,11 @@ class Maquina(tk.Canvas):
                   fill="", outline=SELECCION[0], width=3)
             rrect(self, x1 - 2, y1 - 2, x2 + 2, y2 + MOTOR_H + 2, r=18,
                   fill="", outline=SELECCION[1], width=1)
-
-        # tolva del contenedor
         rrect(self, x1, y1, x2, y2, r=14, fill=panel,
               outline=SELECCION[0] if sel else edge, width=2 if sel else 1)
-        # chicles apilados adentro
+
         cx = (x1 + x2) / 2
-        for k, (dx, dy) in enumerate(((-24, 40), (24, 40), (0, 78),
-                                      (-24, 112), (24, 112))):
+        for dx, dy in ((-24, 40), (24, 40), (0, 78), (-24, 112), (24, 112)):
             if i in self.img:
                 self.create_image(cx + dx, y1 + dy, image=self.img[i])
             else:
@@ -129,15 +147,13 @@ class Maquina(tk.Canvas):
         self.create_text(cx, y1 + 16, text=f"{NAMES[i]}  (color {i})",
                          fill=t["texto_editor"], font=("Segoe UI", 9, "bold"))
 
-        # stepper de este contenedor
         my1, my2 = y2, y2 + MOTOR_H
         girando = (a.motor_activo == i)
         if not self._tiene_motor_img():
             rrect(self, x1 + 14, my1, x2 - 14, my2, r=10,
                   fill=a.hl("registros") if girando else panel,
                   outline=edge, width=1)
-            self.create_text(cx, (my1 + my2) / 2,
-                             text=f"STEPPER {i + 1}",
+            self.create_text(cx, (my1 + my2) / 2, text=f"STEPPER {i + 1}",
                              fill=t["fondo_app"] if girando else muted,
                              font=("Segoe UI", 8, "bold"))
         else:
@@ -148,9 +164,7 @@ class Maquina(tk.Canvas):
         return "stepper_1" in self.big
 
     def _motor(self, i, frame):
-        """Dibuja el stepper del contenedor i con el frame 0 o 1."""
-        key = f"stepper_{frame + 1}"
-        img = self.big.get(key) or self.big.get("stepper_1")
+        img = self.big.get(f"stepper_{frame + 1}") or self.big.get("stepper_1")
         if not img:
             return
         x1, _, x2, y2 = self._cont(i)
@@ -187,11 +201,9 @@ class Maquina(tk.Canvas):
             self.create_image(x, y, image=self.img[i], tags="fall")
         else:
             self.create_oval(x - 17, y - 17, x + 17, y + 17,
-                             fill=COLORES[i], outline="#ffffff",
-                             tags="fall")
+                             fill=COLORES[i], outline="#ffffff", tags="fall")
 
     def caer(self, i):
-        """El chicle baja por la rampa del contenedor i y luego al centro."""
         self.app.anim = True
         self.app.motor_activo = i
         sx, sy = self._salida(i)
@@ -206,16 +218,15 @@ class Maquina(tk.Canvas):
                 self.app.motor_activo = None
                 self.draw()
                 return
-            # el stepper alterna sus 2 frames mientras el chicle baja
             if self._tiene_motor_img() and n % 3 == 0:
                 self.frame ^= 1
                 self.delete(f"motor{i}")
                 self._motor(i, self.frame)
             t = n / pasos
-            if t < 0.55:                       # por la rampa al centro
+            if t < 0.55:
                 u = t / 0.55
                 x, y = sx + (cx - sx) * u, sy + (cy - sy) * u
-            else:                              # caida al centro
+            else:
                 u = (t - 0.55) / 0.45
                 x, y = cx + (tx - cx) * u, cy + (ty - cy) * u * u
             self._bola(x, y, i)

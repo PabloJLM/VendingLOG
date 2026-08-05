@@ -8,8 +8,9 @@ IMG      = os.path.join(BASE, "img")
 BG       = os.path.join(BASE, "bg")
 TEMAS    = os.path.join(BASE, "temas.json")
 
-# El estudiante edita control.v; stepper.v y top.v son fijos
-SKELETON = os.path.join(HDL, "control.v")
+# El estudiante completa esqueleto.v; control.v es la solucion (docente)
+SKELETON = os.path.join(HDL, "esqueleto.v")
+SOLUCION = os.path.join(HDL, "control.v")
 RTL_FIJO = [os.path.join(HDL, "stepper.v"), os.path.join(HDL, "top.v")]
 
 # ruta de Icarus Verilog

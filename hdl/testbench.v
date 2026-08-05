@@ -1,19 +1,6 @@
-// =====================================================================
-// testbench.v - Testbench fijo del simulador (el estudiante NO lo ve)
-//
-// Instancia el TOP completo (control del estudiante + 3 steppers) y
-// ademas EMULA LA PLANTA FISICA: cuando un motor termina de girar
-// (flanco de bajada de ocupado), la bola "cae" y se pulsa
-// sensor_salida, igual que haria el sensor optico real.
-//
-// events.hex: un byte por linea (nibble alto = opcode, bajo = arg)
-//   0x3c  color = c (0..2, queda fijo)
-//   0x1_  moneda: pulso de sensor_entrada + espera de la planta
-//   0xFF  fin
-//
-// output.csv: se escribe una fila SOLO cuando alguna senal cambia
-// (log compacto). Docente: "vvp sim.vvp +vcd" genera wave.vcd.
-// =====================================================================
+// Testbench fijo (el estudiante NO lo ve). Instancia el top completo y
+// emula la planta: al terminar un motor, pulsa sensor_salida.
+// events.hex: 0x3c color=c | 0x1_ moneda | 0xFF fin
 `timescale 1ns/1ps
 
 module testbench;

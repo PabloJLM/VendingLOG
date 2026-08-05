@@ -2,14 +2,25 @@ import os
 import tkinter as tk
 
 from config import BG, IMG
-from estilos import CONT_W, MOTOR_H, TRAY
+from estilos import CONT_W, MOTOR_H, TOLVA_H, TOLVA_W, TRAY
 
 try:
     from PIL import Image, ImageTk
 except ImportError:
     Image = ImageTk = None
 
+EXTS = ("png", "gif", "jpg", "jpeg")
 
+
+def _ruta(nombre):
+    for ext in EXTS:
+        p = os.path.join(IMG, f"{nombre}.{ext}")
+        if os.path.isfile(p):
+            return p
+    return None
+
+
+# Escala manteniendo el aspect ratio (entra dentro de la caja)
 def _load(path, box):
     try:
         if Image:
@@ -23,27 +34,15 @@ def _load(path, box):
         return None
 
 
-def cargar():
-    productos, extras = {}, {}
-    for i in range(3):
-        for ext in ("png", "gif", "jpg", "jpeg"):
-            p = os.path.join(IMG, f"{i}.{ext}")
-            if os.path.isfile(p):
-                if (r := _load(p, (CONT_W - 60, 44))):
-                    productos[i] = r
-                break
-    tw, th = TRAY[2] - TRAY[0], TRAY[3] - TRAY[1]
-    mbox = (CONT_W - 26, MOTOR_H - 4)
-    for name, box in (("fondo", (460, 680)), ("bandeja_0", (tw, th)),
-                      ("bandeja_1", (tw, th)),
-                      ("stepper_1", mbox), ("stepper_2", mbox)):
-        for ext in ("png", "gif", "jpg", "jpeg"):
-            p = os.path.join(IMG, f"{name}.{ext}")
-            if os.path.isfile(p):
-                if (r := _load(p, box)):
-                    extras[name] = r
-                break
-    return productos, extras
+# Estira a un tamano exacto (para rampas y tubos que deben calzar)
+def _load_exacto(path, size):
+    try:
+        if Image:
+            im = Image.open(path).convert("RGBA")
+            return ImageTk.PhotoImage(im.resize(size))
+        return _load(path, size)
+    except Exception:
+        return None
 
 
 def _load_cover(path, size):
@@ -55,10 +54,30 @@ def _load_cover(path, size):
         esc = max(tw / im.width, th / im.height)
         im = im.resize((int(im.width * esc) + 1, int(im.height * esc) + 1))
         x, y = (im.width - tw) // 2, (im.height - th) // 2
-        im = im.crop((x, y, x + tw, y + th))
-        return ImageTk.PhotoImage(im)
+        return ImageTk.PhotoImage(im.crop((x, y, x + tw, y + th)))
     except Exception:
         return None
+
+
+def cargar():
+    productos, extras = {}, {}
+    for i in range(3):
+        if (p := _ruta(str(i))) and (r := _load(p, (CONT_W - 60, 44))):
+            productos[i] = r
+    tw, th = TRAY[2] - TRAY[0], TRAY[3] - TRAY[1]
+    mbox = (CONT_W - 26, MOTOR_H - 4)
+    for nombre, box in (("fondo", (460, 680)), ("bandeja_0", (tw, th)),
+                        ("bandeja_1", (tw, th)), ("stepper_1", mbox),
+                        ("stepper_2", mbox), ("tolva", (TOLVA_W, TOLVA_H))):
+        if (p := _ruta(nombre)) and (r := _load(p, box)):
+            extras[nombre] = r
+    return productos, extras
+
+
+# Rampas y tubo: se estiran al tamano que pide la geometria
+def cargar_pieza(nombre, size):
+    p = _ruta(nombre)
+    return _load_exacto(p, size) if p else None
 
 
 def cargar_fondo_tema(nombre_archivo, size=(900, 760)):
