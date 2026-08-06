@@ -9,7 +9,7 @@ from logica import NO_IV, Sim, toolchain
 from maquina import Maquina
 from ondas import open_gtkwave
 
-
+#prueba de cambio desde pc linux jsjs
 class App:
     def __init__(self, root):
         self.root = root
