@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-from estilos import FUENTE_EDITOR, FUENTES, TAMANOS
+from estilos import FAM_UI, FUENTE_EDITOR, FUENTES, TAMANOS
 import imagenes
 
 
@@ -25,7 +25,7 @@ class Editor:
         self.bar = tk.Frame(self.frame)
         self.bar.pack(fill="x")
         self.lbl = tk.Label(self.bar, text="IDE editable, FIT XVII",
-                            font=("Segoe UI", 11, "bold"))
+                            font=(FAM_UI, 11, "bold"))
         self.lbl.pack(side="left")
         self.btn_opciones = self._btn("⚙", self._toggle_opciones)
         self.btns = [self.btn_opciones] + [self._btn(t, c) for t, c in [
@@ -44,13 +44,13 @@ class Editor:
         sb.pack(side="right", fill="y")
         self.ed.pack(side="left", fill="both", expand=True)
         self.log = tk.Text(self.frame, height=9, wrap="word",
-                           state="disabled", font=("Segoe UI", 10),
+                           state="disabled", font=(FAM_UI, 10),
                            relief="flat", borderwidth=8)
         self.log.pack(fill="x", pady=(6, 0))
 
     def _btn(self, txt, cmd):
         b = tk.Button(self.bar, text=txt, command=cmd, relief="flat",
-                      font=("Segoe UI", 9, "bold"), padx=8, pady=4,
+                      font=(FAM_UI, 9, "bold"), padx=8, pady=4,
                       cursor="hand2")
         b.pack(side="right", padx=3)
         return b
@@ -120,8 +120,8 @@ class Editor:
 
         def campo(texto, valores, actual, on_pick):
             tk.Label(win, text=texto, bg=t["fondo_app"], fg=t["texto_editor"],
-                     font=("Segoe UI", 9, "bold")).pack(anchor="w",
-                                                        padx=10, pady=(8, 2))
+                     font=(FAM_UI, 9, "bold")).pack(anchor="w",
+                                                    padx=10, pady=(8, 2))
             combo = ttk.Combobox(win, values=valores, state="readonly",
                                  width=24)
             combo.set(actual)
@@ -137,7 +137,7 @@ class Editor:
               lambda v: self._set_fuente(tamano=int(v)))
 
         tk.Button(win, text="Cerrar", command=self._toggle_opciones,
-                  relief="flat", font=("Segoe UI", 9, "bold"),
+                  relief="flat", font=(FAM_UI, 9, "bold"),
                   bg=t["tab_sel"], fg=t["texto_editor"]
                   ).pack(pady=10, padx=10, fill="x")
 

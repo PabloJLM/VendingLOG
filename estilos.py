@@ -1,6 +1,22 @@
 import json
+import platform
 
 from config import TEMAS
+
+# Fuentes por sistema operativo -----------------------------------------
+# En Windows "Segoe UI"/"Courier New" siempre existen; en Linux/Mac no,
+# y Tk las reemplaza en silencio por una fuente generica fea. Elegimos
+# una familia que si exista en cada SO para que se vea igual en los dos.
+_SO = platform.system()  # "Windows", "Linux", "Darwin"
+if _SO == "Windows":
+    FAM_UI, FAM_MONO = "Segoe UI", "Courier New"
+    FUENTES = ["Courier New", "Consolas", "Lucida Console"]
+elif _SO == "Darwin":
+    FAM_UI, FAM_MONO = "Helvetica Neue", "Menlo"
+    FUENTES = ["Menlo", "Monaco", "Courier New"]
+else:  # Linux y otros
+    FAM_UI, FAM_MONO = "DejaVu Sans", "DejaVu Sans Mono"
+    FUENTES = ["DejaVu Sans Mono", "Liberation Mono", "Courier New"]
 
 CW, CH = 460, 680
 
@@ -15,13 +31,12 @@ TRAY = (120, 470, 340, 580)        # bandeja central x1, y1, x2, y2
 BOTON_Y = 604                      # boton de moneda (debajo de la bandeja)
 SELECCION = ("#f9ca24", "#ffe082")
 
-FUENTE_TITULO = ("Courier New", 16, "bold")
-FUENTE_LCD    = ("Courier New", 13, "bold")
-FUENTE_UI     = ("Segoe UI", 10, "bold")
-FUENTE_CHICA  = ("Segoe UI", 8)
-FUENTE_EDITOR = ("Courier New", 11)
+FUENTE_TITULO = (FAM_MONO, 16, "bold")
+FUENTE_LCD    = (FAM_MONO, 13, "bold")
+FUENTE_UI     = (FAM_UI, 10, "bold")
+FUENTE_CHICA  = (FAM_UI, 8)
+FUENTE_EDITOR = (FAM_MONO, 11)
 
-FUENTES = ["Courier New", "Consolas", "Lucida Console"]
 TAMANOS = [9, 10, 11, 12, 13, 14, 16, 18]
 
 FALLBACK = {"In the Pool": {

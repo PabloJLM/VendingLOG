@@ -1,7 +1,5 @@
-// Testbench fijo (el estudiante NO lo ve). Instancia el top completo y
-// emula la planta: al terminar un motor, pulsa sensor_salida.
-// events.hex: 0x3c color=c | 0x1_ moneda | 0xFF fin
-`timescale 1ns/1ps
+// Testbench fijo xd
+`timescale 1ns/1ns
 
 module testbench;
     localparam SETTLE = 2;

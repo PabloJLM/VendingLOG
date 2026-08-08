@@ -2,8 +2,9 @@ import tkinter as tk
 
 from config import NAMES
 from estilos import (BOTON_Y, CENTRO, CH, CONT_GAP, CONT_H, CONT_W, CONT_Y,
-                     CW, FUENTE_CHICA, FUENTE_TITULO, FUENTE_UI, MOTOR_H,
-                     SELECCION, TOLVA_H, TOLVA_W, TRAY, TUBO_W, rrect)
+                     CW, FAM_MONO, FAM_UI, FUENTE_CHICA, FUENTE_TITULO,
+                     FUENTE_UI, MOTOR_H, SELECCION, TOLVA_H, TOLVA_W, TRAY,
+                     TUBO_W, rrect)
 import imagenes
 
 COLORES = ["#e74c3c", "#2ecc71", "#3498db"]
@@ -73,7 +74,7 @@ class Maquina(tk.Canvas):
         else:
             rrect(self, 10, 10, CW - 10, CH - 10, r=26,
                   fill=t["fondo_editor"], outline=edge, width=2)
-        self.create_text(CW / 2, 32, text="CHICLERA VERILOG", fill=acc,
+        self.create_text(CW / 2, 32, text="vending jsjs", fill=acc,
                          font=FUENTE_TITULO)
 
         self._rampas(edge, muted)
@@ -87,7 +88,7 @@ class Maquina(tk.Canvas):
                   a.ultimo_exito, panel, edge, muted)
 
         self.create_text(CW - 26, 32, anchor="e", text="reiniciar",
-                         fill=muted, font=("Segoe UI", 9, "underline"))
+                         fill=muted, font=(FAM_UI, 9, "underline"))
         self._zona(CW - 90, 20, CW - 22, 44, a.reiniciar)
 
         if not a.on:
@@ -95,9 +96,9 @@ class Maquina(tk.Canvas):
                   stipple="gray50", outline="")
             self.create_text(CW / 2, CH / 2 - 10, text="MAQUINA APAGADA",
                              fill=t["texto_editor"],
-                             font=("Courier New", 14, "bold"))
+                             font=(FAM_MONO, 14, "bold"))
             self.create_text(CW / 2, CH / 2 + 16, fill=muted,
-                             font=("Segoe UI", 10),
+                             font=(FAM_UI, 10),
                              text="Compila tu control.v y se encendera")
 
     def _rampas(self, edge, muted):
@@ -145,7 +146,7 @@ class Maquina(tk.Canvas):
                                  cx + dx + 17, y1 + dy + 17,
                                  fill=COLORES[i], outline="")
         self.create_text(cx, y1 + 16, text=f"{NAMES[i]}  (color {i})",
-                         fill=t["texto_editor"], font=("Segoe UI", 9, "bold"))
+                         fill=t["texto_editor"], font=(FAM_UI, 9, "bold"))
 
         my1, my2 = y2, y2 + MOTOR_H
         girando = (a.motor_activo == i)
@@ -155,7 +156,7 @@ class Maquina(tk.Canvas):
                   outline=edge, width=1)
             self.create_text(cx, (my1 + my2) / 2, text=f"STEPPER {i + 1}",
                              fill=t["fondo_app"] if girando else muted,
-                             font=("Segoe UI", 8, "bold"))
+                             font=(FAM_UI, 8, "bold"))
         else:
             self._motor(i, self.frame if girando else 0)
         self._zona(x1, y1, x2, my2, lambda: a.elegir(i))
@@ -176,7 +177,7 @@ class Maquina(tk.Canvas):
                          fill=color if encendido else panel,
                          outline=edge, width=2)
         self.create_text(x + 15, y + 40, text=texto, fill=muted,
-                         font=("Segoe UI", 7))
+                         font=(FAM_UI, 7))
 
     def _bandeja(self, panel, edge, muted):
         a = self.app
