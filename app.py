@@ -1,6 +1,8 @@
 import os
+import shutil
 import tkinter as tk
-from tkinter import messagebox
+from datetime import datetime
+from tkinter import filedialog, messagebox
 
 from config import NAMES, SKELETON
 from editor import Editor
@@ -137,6 +139,24 @@ class App:
             return
         self.editor.msg("GTKWave abierto. Volve a apretar Senales "
                         "para ver los cambios mas recientes.", "info")
+
+    def guardar_ondas(self):
+        if not (self.sim and os.path.isfile(self.sim.vcd)):
+            self.editor.msg("Todavia no hay ondas: compila y usa la "
+                            "maquina primero.", "err")
+            return
+        carpeta = filedialog.askdirectory(title="Elegi carpeta para "
+                                          "guardar las ondas de esta corrida")
+        if not carpeta:
+            return
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        destino = os.path.join(carpeta, f"ondas_{ts}")
+        os.makedirs(destino, exist_ok=True)
+        shutil.copy(self.sim.vcd, os.path.join(destino, "wave.vcd"))
+        csv_src = os.path.join(self.sim.wd, "output.csv")
+        if os.path.isfile(csv_src):
+            shutil.copy(csv_src, os.path.join(destino, "output.csv"))
+        self.editor.msg(f"Ondas guardadas en {destino}", "ok")
 
 
 if __name__ == "__main__":

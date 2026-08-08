@@ -4,7 +4,7 @@ from tkinter import filedialog, ttk
 
 from estilos import FAM_UI, FUENTE_EDITOR, FUENTES, TAMANOS
 import imagenes
-
+#apt search labview
 
 class Editor:
     def __init__(self, root, app):
@@ -24,13 +24,14 @@ class Editor:
                                                  anchor="nw")
         self.bar = tk.Frame(self.frame)
         self.bar.pack(fill="x")
-        self.lbl = tk.Label(self.bar, text="IDE editable, FIT XVII",
+        self.lbl = tk.Label(self.bar, text="IDE, FIT XVII",
                             font=(FAM_UI, 11, "bold"))
         self.lbl.pack(side="left")
         self.btn_opciones = self._btn("⚙", self._toggle_opciones)
         self.btns = [self.btn_opciones] + [self._btn(t, c) for t, c in [
             ("Compilar y correr", app.compilar),
-            ("Senales", app.ondas),
+            ("Señales", app.ondas),
+            ("Guardar ondas", app.guardar_ondas),
             ("Abrir .v", self.abrir),
             ("Guardar .v", self.guardar),
             ("Esqueleto", app.esqueleto)]]
