@@ -50,6 +50,7 @@ module testbench;
     reg [7:0] ev;
     reg [6:0] vec, prev_vec;
     integer   fd, i, j, t, cycle, ev_idx, prev_ev;
+    reg       just_wrote = 0;   // avisa al bloque de negedge que espeje la fila
 
     // un ciclo de reloj; escribe fila solo si algo cambio
     task step;
@@ -60,21 +61,33 @@ module testbench;
             vec = {led_visto, ocupado1, ocupado2, ocupado3,
                    sensor_salida, color};
             if (vec !== prev_vec || ev_idx != prev_ev) begin
-                $fwrite(fd, "%0d,%0d,%b,%b,%b,%b,%b,%0d\n",
-                        cycle, ev_idx, led_visto, ocupado1, ocupado2,
+                $fwrite(fd, "%b,%0d,%b,%b,%b,%b,%b,%0d\n",
+                        clk, ev_idx, led_visto, ocupado1, ocupado2,
                         ocupado3, sensor_salida, color);
                 prev_vec = vec;
                 prev_ev  = ev_idx;
+                just_wrote = 1;
             end
         end
     endtask
+
+    // espejo de la fila anterior con clk=0, para que el CSV muestre el
+    // 0 y el 1 del reloj (en vez de siempre 1, que es cuando se muestrea)
+    always @(negedge clk) begin
+        if (just_wrote) begin
+            $fwrite(fd, "%b,%0d,%b,%b,%b,%b,%b,%0d\n",
+                    clk, ev_idx, led_visto, ocupado1, ocupado2,
+                    ocupado3, sensor_salida, color);
+            just_wrote = 0;
+        end
+    end
 
     initial begin
         for (i = 0; i < 1024; i = i + 1) events[i] = 8'hFF;
         $readmemh("events.hex", events);
 
         fd = $fopen("output.csv", "w");
-        $fwrite(fd, "cycle,event,led,oc1,oc2,oc3,salida,color\n");
+        $fwrite(fd, "clk,event,led,oc1,oc2,oc3,salida,color\n");
         cycle = 0;
         ev_idx = -1;
         prev_ev = -2;
