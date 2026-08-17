@@ -52,6 +52,9 @@ module testbench;
     integer   fd, i, j, t, cycle, ev_idx, prev_ev;
     reg       just_wrote = 0;   // avisa al bloque de negedge que espeje la fila
 
+    // contador de bolas entregadas por color (0=Rojo, 1=Verde, 2=Azul)
+    integer   cnt_rojo, cnt_verde, cnt_azul;
+
     // un ciclo de reloj; escribe fila solo si algo cambio
     task step;
         begin
@@ -61,9 +64,10 @@ module testbench;
             vec = {led_visto, ocupado1, ocupado2, ocupado3,
                    sensor_salida, color};
             if (vec !== prev_vec || ev_idx != prev_ev) begin
-                $fwrite(fd, "%b,%0d,%b,%b,%b,%b,%b,%0d\n",
+                $fwrite(fd, "%b,%0d,%b,%b,%b,%b,%b,%0d,%0d,%0d,%0d\n",
                         clk, ev_idx, led_visto, ocupado1, ocupado2,
-                        ocupado3, sensor_salida, color);
+                        ocupado3, sensor_salida, color,
+                        cnt_rojo, cnt_verde, cnt_azul);
                 prev_vec = vec;
                 prev_ev  = ev_idx;
                 just_wrote = 1;
@@ -75,9 +79,10 @@ module testbench;
     // 0 y el 1 del reloj (en vez de siempre 1, que es cuando se muestrea)
     always @(negedge clk) begin
         if (just_wrote) begin
-            $fwrite(fd, "%b,%0d,%b,%b,%b,%b,%b,%0d\n",
+            $fwrite(fd, "%b,%0d,%b,%b,%b,%b,%b,%0d,%0d,%0d,%0d\n",
                     clk, ev_idx, led_visto, ocupado1, ocupado2,
-                    ocupado3, sensor_salida, color);
+                    ocupado3, sensor_salida, color,
+                    cnt_rojo, cnt_verde, cnt_azul);
             just_wrote = 0;
         end
     end
@@ -87,11 +92,14 @@ module testbench;
         $readmemh("events.hex", events);
 
         fd = $fopen("output.csv", "w");
-        $fwrite(fd, "clk,event,led,oc1,oc2,oc3,salida,color\n");
+        $fwrite(fd, "clk,event,led,oc1,oc2,oc3,salida,color,cnt_rojo,cnt_verde,cnt_azul\n");
         cycle = 0;
         ev_idx = -1;
         prev_ev = -2;
         prev_vec = 7'h7f;
+        cnt_rojo = 0;
+        cnt_verde = 0;
+        cnt_azul = 0;
 
         rst = 0; step; step;                 // reset activo en bajo
         rst = 1; step;
@@ -122,6 +130,12 @@ module testbench;
                         // la bola cae hasta el sensor de salida
                         repeat (10) step;
                         sensor_salida = 1;
+                        case (color)                 // suma al contador
+                            2'd0: cnt_rojo  = cnt_rojo  + 1;
+                            2'd1: cnt_verde = cnt_verde + 1;
+                            2'd2: cnt_azul  = cnt_azul  + 1;
+                            default: ;
+                        endcase
                         repeat (3) step;
                         sensor_salida = 0;
                     end
