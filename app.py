@@ -4,7 +4,7 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog, messagebox
 
-from config import NAMES, SKELETON
+from config import NAMES, SOLUCION
 from editor import Editor
 from estilos import CH, CW, load_themes
 from logica import NO_IV, Sim, toolchain
@@ -24,15 +24,15 @@ class App:
         self.ultimo_exito = False
 
         root.title("Chiclera Verilog")
-        root.geometry(f"{CW + 780}x{CH + 16}")
+        root.geometry(f"{CW + 600}x{CH + 16}")
         izq = tk.Frame(root, width=CW + 10)
         izq.pack(side="left", fill="y")
         izq.pack_propagate(False)
         self.izq = izq
         self.maq = Maquina(izq, self)
         self.editor = Editor(root, self)
-        if os.path.isfile(SKELETON):
-            self.editor.poner(open(SKELETON, encoding="utf-8").read())
+        if os.path.isfile(SOLUCION):
+            self.editor.poner(open(SOLUCION, encoding="utf-8").read())
         self.cambiar_tema(self.tname)
         if not toolchain()[0]:
             root.after(300, lambda: messagebox.showwarning("Falta Icarus", NO_IV))
@@ -127,10 +127,6 @@ class App:
         self._correr()
         self.editor.msg("Sesion reiniciada", "info")
         self.maq.draw()
-
-    def esqueleto(self):
-        self.editor.poner(open(SKELETON, encoding="utf-8").read())
-        self.editor.msg("Esqueleto cargado: completa los TODO", "info")
 
     def ondas(self):
         err = open_gtkwave(self.sim)

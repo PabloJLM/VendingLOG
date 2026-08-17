@@ -1,6 +1,5 @@
-import os
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import ttk
 
 from estilos import FAM_UI, FUENTE_EDITOR, FUENTES, TAMANOS
 import imagenes
@@ -31,15 +30,13 @@ class Editor:
         self.btns = [self.btn_opciones] + [self._btn(t, c) for t, c in [
             ("Compilar y correr", app.compilar),
             ("Señales", app.ondas),
-            ("Guardar ondas", app.guardar_ondas),
-            ("Abrir .v", self.abrir),
-            ("Guardar .v", self.guardar),
-            ("Esqueleto", app.esqueleto)]]
+            ("Guardar ondas", app.guardar_ondas)]]
 
         cuerpo = tk.Frame(self.frame)
         cuerpo.pack(fill="both", expand=True, pady=(6, 0))
         self.ed = tk.Text(cuerpo, wrap="none", font=tuple(self.fuente),
-                          undo=True, relief="flat", borderwidth=8)
+                          undo=True, relief="flat", borderwidth=8,
+                          state="disabled", cursor="arrow")
         sb = ttk.Scrollbar(cuerpo, command=self.ed.yview)
         self.ed.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y")
@@ -60,24 +57,16 @@ class Editor:
         return self.ed.get("1.0", "end-1c")
 
     def poner(self, txt):
+        self.ed.configure(state="normal")
         self.ed.delete("1.0", "end")
         self.ed.insert("1.0", txt)
+        self.ed.configure(state="disabled")
 
     def msg(self, txt, tag="info"):
         self.log.configure(state="normal")
         self.log.insert("end", txt + "\n", tag)
         self.log.see("end")
         self.log.configure(state="disabled")
-
-    def abrir(self):
-        if (p := filedialog.askopenfilename(filetypes=[("Verilog", "*.v")])):
-            self.poner(open(p, encoding="utf-8", errors="replace").read())
-
-    def guardar(self):
-        if (p := filedialog.asksaveasfilename(defaultextension=".v",
-                                              filetypes=[("Verilog", "*.v")])):
-            open(p, "w", encoding="utf-8").write(self.codigo())
-            self.msg(f"Guardado: {os.path.basename(p)}", "ok")
 
     def _reubicar(self, event):
         pad = 20

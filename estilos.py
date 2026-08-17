@@ -18,17 +18,20 @@ else:  # Linux y otros
     FAM_UI, FAM_MONO = "DejaVu Sans", "DejaVu Sans Mono"
     FUENTES = ["DejaVu Sans Mono", "Liberation Mono", "Courier New"]
 
-CW, CH = 460, 680
+# Animacion agrandada (~30% del tamano original) y editor mas angosto: el
+# codigo ya no se modifica, así que la maquina merece la mayor parte de
+# la pantalla.
+CW, CH = 594, 876
 
 # 3 contenedores (uno por color), cada uno con su stepper debajo
-CONT_W, CONT_H, CONT_GAP = 124, 172, 14
-CONT_Y = 62                        # borde superior de los contenedores
-MOTOR_H = 52                       # caja del stepper bajo cada contenedor
-CENTRO = (230, 396)                # punto donde convergen las 3 rampas
-TOLVA_W, TOLVA_H = 96, 62          # embudo central (img/tolva.png)
-TUBO_W = 34                        # tubo tolva -> bandeja (img/tubo.png)
-TRAY = (120, 470, 340, 580)        # bandeja central x1, y1, x2, y2
-BOTON_Y = 604                      # boton de moneda (debajo de la bandeja)
+CONT_W, CONT_H, CONT_GAP = 160, 222, 18
+CONT_Y = 80                        # borde superior de los contenedores
+MOTOR_H = 67                       # caja del stepper bajo cada contenedor
+CENTRO = (297, 510)                # punto donde convergen las 3 rampas
+TOLVA_W, TOLVA_H = 123, 80         # embudo central (img/tolva.png)
+TUBO_W = 44                        # tubo tolva -> bandeja (img/tubo.png)
+TRAY = (155, 606, 438, 747)        # bandeja central x1, y1, x2, y2
+BOTON_Y = 778                      # boton de moneda (debajo de la bandeja)
 SELECCION = ("#f9ca24", "#ffe082")
 
 FUENTE_TITULO = (FAM_MONO, 16, "bold")
