@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 
 from config import BG, IMG
-from estilos import CONT_W, MOTOR_H, TOLVA_H, TOLVA_W, TRAY
+from estilos import CH, CONT_W, CW, MOTOR_H, TOLVA_H, TOLVA_W, TRAY
 
 try:
     from PIL import Image, ImageTk
@@ -59,16 +59,18 @@ def _load_cover(path, size):
         return None
 
 
-def cargar():
+def cargar(k=1.0):
+    esc = lambda w, h: (max(int(w * k), 8), max(int(h * k), 8))
     productos, extras = {}, {}
     for i in range(3):
-        if (p := _ruta(str(i))) and (r := _load(p, (CONT_W - 60, 44))):
+        if (p := _ruta(str(i))) and (r := _load(p, esc(CONT_W - 60, 44))):
             productos[i] = r
     tw, th = TRAY[2] - TRAY[0], TRAY[3] - TRAY[1]
-    mbox = (CONT_W - 26, MOTOR_H - 4)
-    for nombre, box in (("fondo", (460, 680)), ("bandeja_0", (tw, th)),
-                        ("bandeja_1", (tw, th)), ("stepper_1", mbox),
-                        ("stepper_2", mbox), ("tolva", (TOLVA_W, TOLVA_H))):
+    mbox = esc(CONT_W - 26, MOTOR_H - 4)
+    for nombre, box in (("fondo", esc(CW, CH)), ("bandeja_0", esc(tw, th)),
+                        ("bandeja_1", esc(tw, th)), ("stepper_1", mbox),
+                        ("stepper_2", mbox),
+                        ("tolva", esc(TOLVA_W, TOLVA_H))):
         if (p := _ruta(nombre)) and (r := _load(p, box)):
             extras[nombre] = r
     return productos, extras

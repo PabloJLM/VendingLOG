@@ -24,18 +24,29 @@ class App:
         self.ultimo_exito = False
 
         root.title("Chiclera Verilog")
-        root.geometry(f"{CW + 600}x{CH + 16}")
-        izq = tk.Frame(root, width=CW + 10)
-        izq.pack(side="left", fill="y")
-        izq.pack_propagate(False)
-        self.izq = izq
-        self.maq = Maquina(izq, self)
-        self.editor = Editor(root, self)
+        root.geometry(f"{CW + 620}x{CH + 16}")
+        # Divisor arrastrable: la maquina se lleva la mayor parte
+        self.paned = tk.PanedWindow(root, orient="horizontal", bd=0,
+                                    sashwidth=7, sashrelief="flat")
+        self.paned.pack(fill="both", expand=True)
+        self.izq = tk.Frame(self.paned)
+        self.paned.add(self.izq, minsize=320, stretch="always")
+        self.maq = Maquina(self.izq, self)
+        self.editor = Editor(self.paned, self)
+        self.paned.add(self.editor.fondo, minsize=360, stretch="always")
+        root.after(60, self._sash_inicial)
         if os.path.isfile(SOLUCION):
             self.editor.poner(open(SOLUCION, encoding="utf-8").read())
         self.cambiar_tema(self.tname)
         if not toolchain()[0]:
             root.after(300, lambda: messagebox.showwarning("Falta Icarus", NO_IV))
+
+    # La maquina arranca con el 60% del ancho; el resto es el editor
+    def _sash_inicial(self):
+        self.root.update_idletasks()
+        ancho = self.paned.winfo_width()
+        if ancho > 100:
+            self.paned.sash_place(0, int(ancho * 0.6), 0)
 
     @property
     def T(self):

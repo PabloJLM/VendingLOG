@@ -60,12 +60,19 @@ parte de la FSM revisar.
 | `hdl/testbench.v` | Fijo: reloj, eventos, emulacion de la planta, log, watchdog |
 | `app.py` | La sesion: estado y acciones (se ejecuta este) |
 | `logica.py` | Motor batch replay: iverilog/vvp, timeouts, parseo, errores |
-| `maquina.py` | Dibuja la chiclera (globo, selectores, bandeja, animacion) |
+| `maquina.py` | Dibuja la chiclera; escala sola al tamano del panel |
 | `editor.py` | Editor de codigo + consola + opciones (tema/fuente/tamano) |
 | `imagenes.py` | Carga de imagenes con aspect ratio |
 | `estilos.py` | Layout, fuentes, temas, formas |
 | `config.py` | Rutas y nombres de los 3 colores |
 | `ondas.py` | GTKWave con las senales precargadas |
+
+## Ventana
+
+La maquina y el editor estan separados por un divisor que se puede
+arrastrar con el mouse. La maquina arranca con el 60% del ancho y
+todo su dibujo (formas, imagenes y textos) escala solo al tamano del
+panel, asi que agrandar la ventana agranda la animacion.
 
 ## Imagenes (carpeta img/)
 

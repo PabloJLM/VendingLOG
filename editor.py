@@ -14,8 +14,6 @@ class Editor:
         self._bg_nombre = None
 
         self.fondo = tk.Canvas(root, highlightthickness=0)
-        self.fondo.pack(side="left", fill="both", expand=True,
-                        padx=8, pady=6)
         self.fondo.bind("<Configure>", self._reubicar)
 
         self.frame = tk.Frame(self.fondo)
