@@ -122,7 +122,7 @@ class Maquina(tk.Canvas):
         self._pill(CW * 0.11, BOTON_Y, CW * 0.62, BOTON_Y + 46,
                    "METER MONEDA", a.hl("inmediatos"), a.moneda,
                    fg=t["fondo_app"])
-        self._led(CW * 0.72, BOTON_Y + 4, "EXITO", a.hl("inmediatos"),
+        self._led(CW * 0.72, BOTON_Y + 4, "LED", a.hl("inmediatos"),
                   a.ultimo_exito, panel, edge)
 
         self.create_text(self.px(CW - 26), self.py(32), anchor="e",
@@ -189,8 +189,8 @@ class Maquina(tk.Canvas):
 
         cx = (x1 + x2) / 2
         r_bola = CONT_W * 0.14
-        for dx, dy in ((-0.15, 0.18), (0.15, 0.18), (0, 0.35),
-                       (-0.15, 0.51), (0.15, 0.51)):
+        for dx, dy in ((-0.15, 0.28), (0.15, 0.28), (0, 0.50),
+                       (-0.15, 0.72), (0.15, 0.72)):
             bx, by = cx + CONT_W * dx, y1 + CONT_H * dy
             if i in self.img:
                 self.create_image(self.px(bx), self.py(by),
@@ -207,7 +207,7 @@ class Maquina(tk.Canvas):
         my1, my2 = y2, y2 + MOTOR_H
         girando = (a.motor_activo == i)
         if not self._tiene_motor_img():
-            self._rr(x1 + 16, my1, x2 - 16, my2, r=11,
+            self._rr(x1 + 6, my1, x2 - 6, my2, r=12,
                      fill=a.hl("registros") if girando else panel,
                      outline=edge, width=1)
             self.create_text(self.px(cx), self.py((my1 + my2) / 2),
@@ -273,7 +273,7 @@ class Maquina(tk.Canvas):
         cx, cy = CENTRO
         tx, ty = (TRAY[0] + TRAY[2]) / 2, (TRAY[1] + TRAY[3]) / 2 - 8
 
-        def paso(n=0, pasos=30):
+        def paso(n=0, pasos=55):
             self.delete("fall")
             if n > pasos:
                 self.app.anim = False
@@ -292,5 +292,5 @@ class Maquina(tk.Canvas):
                 u = (t - 0.55) / 0.45
                 x, y = cx + (tx - cx) * u, cy + (ty - cy) * u * u
             self._bola(x, y, i)
-            self.after(22, lambda: paso(n + 1))
+            self.after(35, lambda: paso(n + 1))
         paso()

@@ -16,7 +16,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.themes = load_themes()
-        self.tname = next((k for k in self.themes if "In the Pool" in k),
+        self.tname = next((k for k in self.themes if "Dark" in k),
                           list(self.themes)[0])
         self.sim = self.state = None
         self.on = self.anim = False
@@ -129,6 +129,7 @@ class App:
         if self.tray is not None:
             self.editor.msg(f"Retiraste el chicle {NAMES[self.tray]}", "ok")
             self.tray = None
+            self.ultimo_exito = False
             self.maq.draw()
 
     def reiniciar(self):

@@ -66,7 +66,7 @@ def cargar(k=1.0):
         if (p := _ruta(str(i))) and (r := _load(p, esc(CONT_W - 60, 44))):
             productos[i] = r
     tw, th = TRAY[2] - TRAY[0], TRAY[3] - TRAY[1]
-    mbox = esc(CONT_W - 26, MOTOR_H - 4)
+    mbox = esc(CONT_W - 8, MOTOR_H)
     for nombre, box in (("fondo", esc(CW, CH)), ("bandeja_0", esc(tw, th)),
                         ("bandeja_1", esc(tw, th)), ("stepper_1", mbox),
                         ("stepper_2", mbox),

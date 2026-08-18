@@ -24,9 +24,9 @@ else:  # Linux y otros
 CW, CH = 594, 876
 
 # 3 contenedores (uno por color), cada uno con su stepper debajo
-CONT_W, CONT_H, CONT_GAP = 160, 222, 18
+CONT_W, CONT_H, CONT_GAP = 160, 198, 18
 CONT_Y = 80                        # borde superior de los contenedores
-MOTOR_H = 67                       # caja del stepper bajo cada contenedor
+MOTOR_H = 94                       # caja del stepper bajo cada contenedor
 CENTRO = (297, 510)                # punto donde convergen las 3 rampas
 TOLVA_W, TOLVA_H = 123, 80         # embudo central (img/tolva.png)
 TUBO_W = 44                        # tubo tolva -> bandeja (img/tubo.png)
