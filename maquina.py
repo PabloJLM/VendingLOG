@@ -111,7 +111,7 @@ class Maquina(tk.Canvas):
         else:
             self._rr(10, 10, CW - 10, CH - 10, r=26,
                      fill=t["fondo_editor"], outline=edge, width=2)
-        self.create_text(self.px(CW / 2), self.py(32), text="vending jsjs",
+        self.create_text(self.px(CW / 2), self.py(32), text="Simulador",
                          fill=acc, font=self.f(FAM_MONO, 16, "bold"))
 
         self._rampas(edge, muted)

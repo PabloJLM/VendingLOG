@@ -23,7 +23,7 @@ class App:
         self.sel = self.tray = self.motor_activo = None
         self.ultimo_exito = False
 
-        root.title("Chiclera Verilog")
+        root.title("Simulador Semiconductores")
         root.geometry(f"{CW + 620}x{CH + 16}")
         # Divisor arrastrable: la maquina se lleva la mayor parte
         self.paned = tk.PanedWindow(root, orient="horizontal", bd=0,
@@ -111,7 +111,7 @@ class App:
         self.ultimo_exito = exito
         if motor is not None and exito:
             self.tray = motor
-            self.editor.msg(f"Salio un chicle {NAMES[motor]} "
+            self.editor.msg(f"Salio una pelota {NAMES[motor]} "
                             f"(motor {motor + 1})", "ok")
             self.maq.draw()
             self.maq.caer(motor)
@@ -127,7 +127,7 @@ class App:
 
     def retirar(self):
         if self.tray is not None:
-            self.editor.msg(f"Retiraste el chicle {NAMES[self.tray]}", "ok")
+            self.editor.msg(f"Retiraste la pelota {NAMES[self.tray]}", "ok")
             self.tray = None
             self.ultimo_exito = False
             self.maq.draw()

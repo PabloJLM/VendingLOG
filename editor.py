@@ -21,7 +21,7 @@ class Editor:
                                                  anchor="nw")
         self.bar = tk.Frame(self.frame)
         self.bar.pack(fill="x")
-        self.lbl = tk.Label(self.bar, text="IDE, FIT XVII",
+        self.lbl = tk.Label(self.bar, text="FIT XVII",
                             font=(FAM_UI, 11, "bold"))
         self.lbl.pack(side="left")
         self.btn_opciones = self._btn("⚙", self._toggle_opciones)
